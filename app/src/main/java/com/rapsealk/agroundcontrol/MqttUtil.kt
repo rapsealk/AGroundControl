@@ -2,11 +2,13 @@ package com.rapsealk.agroundcontrol
 
 import android.content.Context
 import android.util.Log
+import com.google.gson.Gson
+import com.rapsealk.agroundcontrol.data.Heartbeat
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
 
-object MqttUtil : MqttCallback {
+class MqttUtil(private val context: Context) : MqttCallback {
 
     private val MQTT_TOPIC = "heartbeat"
     private var published: Boolean = false
@@ -14,9 +16,10 @@ object MqttUtil : MqttCallback {
     private val TAG = MqttUtil::class.java.name
 
 
-    fun getClient(context: Context, hostname: String): MqttAndroidClient {
+    fun getClient(): MqttAndroidClient {
         if (client == null) {
             val clientId = MqttClient.generateClientId()
+            val hostname = context.resources.getString(R.string.mqtt_url)
             val mqttUrl = "tcp://$hostname:1883"
             client = MqttAndroidClient(context, mqttUrl, clientId)
             client?.setCallback(this)
@@ -78,8 +81,23 @@ object MqttUtil : MqttCallback {
     /**
      * MqttCallback
      */
-    override fun messageArrived(topic: String?, message: MqttMessage?) {
+    override fun messageArrived(topic: String, message: MqttMessage) {
         Log.d(TAG, "messageArrived(topic=$topic, message=$message")
+
+        val gson = Gson()
+
+        when {
+            topic == "heartbeat" -> {
+                val heartbeat = gson.fromJson(message.toString(), Heartbeat::class.java)
+                Log.d(TAG, "Heartbeat(timestamp=${heartbeat.timestamp}")
+                updateDroneId(heartbeat.hostname)
+            }
+        }
+/*
+        when {
+            topic.startsWith("heartbeat") ->
+        }*/
+
         //Toast.makeText(this, "topic: $topic, message: ${message?.payload}", Toast.LENGTH_SHORT).show()
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -92,5 +110,10 @@ object MqttUtil : MqttCallback {
 
     override fun connectionLost(cause: Throwable?) {
         //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+    // MqttCallback
+
+    fun updateDroneId(droneId: String) {
+        (context as MainActivity).updateDroneId(droneId)
     }
 }
