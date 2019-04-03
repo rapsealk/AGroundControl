@@ -1,14 +1,24 @@
 package com.rapsealk.agroundcontrol
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.Snackbar
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 import com.rapsealk.agroundcontrol.data.GlobalPosition
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -16,18 +26,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
 
     private val TAG = MainActivity::class.java.simpleName
 
+    companion object {
+        private val REQUEST_PERMISSION_LOCATION = 0x0001
+    }
+
     val droneIdList = arrayListOf("")
     private lateinit var droneIdSpinnerAdapter: ArrayAdapter<String>
 
     private lateinit var mqttUtil: MqttUtil
 
     private lateinit var mGoogleMap: GoogleMap
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        droneIdSpinnerAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, droneIdList)
+        droneIdSpinnerAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, droneIdList)
         droneIdSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         drone_id_spinner.adapter = droneIdSpinnerAdapter
         drone_id_spinner.onItemSelectedListener = this
@@ -44,6 +59,51 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         btn_disarm.setOnClickListener(this)
         btn_takeoff.setOnClickListener(this)
         btn_land.setOnClickListener(this)
+
+        checkPermission()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_PERMISSION_LOCATION -> {
+                if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                    init()
+                } else {
+                    val snackbar = Snackbar.make(root_view, "권한 획득에 실패했습니다.", Snackbar.LENGTH_INDEFINITE)
+                    snackbar.setAction("다시하기") {
+                        snackbar.dismiss()
+                        checkPermission()
+                    }
+                    .show()
+                }
+            }
+        }
+    }
+
+    private fun checkPermission() {
+        val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (permissions.any { ContextCompat.checkSelfPermission(this@MainActivity, it) != PackageManager.PERMISSION_GRANTED }) {
+            // request for permission
+            ActivityCompat.requestPermissions(this@MainActivity, permissions, REQUEST_PERMISSION_LOCATION)
+        } else {
+            // permission already granted
+            init()
+        }
+    }
+
+    private fun init() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        mFusedLocationClient.lastLocation.addOnSuccessListener {
+            //Toast.makeText(this@MainActivity, "(${it.latitude}, ${it.longitude}, ${it.altitude}) with acc: ${it.accuracy}", Toast.LENGTH_LONG).show()
+            tv_latitude.text = it.latitude.toString()
+            tv_longitude.text = it.longitude.toString()
+            tv_altitude.text = it.altitude.toString()
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 16f))
+        }.addOnFailureListener {
+            Toast.makeText(this@MainActivity, "Failed to get last location..", Toast.LENGTH_LONG).show()
+            it.printStackTrace()
+        }
     }
 
     /**
