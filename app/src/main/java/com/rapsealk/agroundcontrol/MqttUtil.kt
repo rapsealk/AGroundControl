@@ -10,11 +10,14 @@ import org.eclipse.paho.client.mqttv3.*
 
 class MqttUtil(private val context: Context) : MqttCallback {
 
-    private val MQTT_TOPIC = "heartbeat"
-    private var published: Boolean = false
-    private var client: MqttAndroidClient? = null
     private val TAG = MqttUtil::class.java.name
 
+    companion object {
+        private val EmptyMessage = "{}"
+    }
+
+    private val MQTT_TOPIC = "heartbeat"
+    private var client: MqttAndroidClient? = null
 
     fun getClient(): MqttAndroidClient {
         if (client == null) {
@@ -40,7 +43,6 @@ class MqttUtil(private val context: Context) : MqttCallback {
                 override fun onSuccess(asyncActionToken: IMqttToken) {
                     Log.d(TAG, "onSuccess")
                     client?.subscribe("heartbeat", 1)
-                    publishMessage("Harry potter")
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
@@ -56,19 +58,30 @@ class MqttUtil(private val context: Context) : MqttCallback {
 
     }
 
-    fun publishMessage(payload: String) {
-        published = false
+    fun publishMessage(topic: String, payload: String = EmptyMessage) {
         try {
-            val encodedpayload = payload.toByteArray()
-            val message = MqttMessage(encodedpayload)
-            client!!.publish(MQTT_TOPIC, message)
-            published = true
-            Log.i(TAG, "message successfully published : $payload")
+            val message = MqttMessage(payload.toByteArray())
+            client!!.publish(topic, message)
         } catch (e: Exception) {
             Log.e(TAG, "Error when publishing message : $e")
             e.printStackTrace()
         }
+    }
 
+    public fun arm(droneId: String) {
+        publishMessage("arm/$droneId")
+    }
+
+    public fun disarm(droneId: String) {
+        publishMessage("disarm/$droneId")
+    }
+
+    public fun takeoff(droneId: String) {
+        publishMessage("takeoff/$droneId")
+    }
+
+    public fun land(droneId: String) {
+        publishMessage("land/$droneId")
     }
 
     fun close() {

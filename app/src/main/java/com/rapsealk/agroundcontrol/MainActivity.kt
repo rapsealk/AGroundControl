@@ -8,14 +8,15 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnItemSelectedListener {
 
     private val TAG = MainActivity::class.java.simpleName
 
-    val droneIdList = arrayListOf("droneId01", "droneId02", "droneId03")
+    val droneIdList = arrayListOf("")
     private lateinit var droneIdSpinnerAdapter: ArrayAdapter<String>
 
     private lateinit var mqttUtil: MqttUtil
+    private var droneId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,15 +31,34 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         mqttUtil = MqttUtil(this)
         val mqttClient = mqttUtil.getClient()
+
+        btn_arm.setOnClickListener(this)
+        btn_disarm.setOnClickListener(this)
+        btn_takeoff.setOnClickListener(this)
+        btn_land.setOnClickListener(this)
     }
+
+    /**
+     * View.OnClickListener
+     */
+    override fun onClick(view: View) {
+        if (droneId.isEmpty()) return
+
+        when (view.id) {
+            R.id.btn_arm -> { mqttUtil.arm(droneId) }
+            R.id.btn_disarm -> { mqttUtil.disarm(droneId) }
+            R.id.btn_takeoff -> { mqttUtil.takeoff(droneId) }
+            R.id.btn_land -> { mqttUtil.land(droneId) }
+        }
+    }
+    // View.OnClickListener
 
     /**
      * AdapterView.OnItemSelectedListener
      */
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         Log.d(TAG, "onItemSelected(parent: $parent, view: $view, position: $position, id: $id)")
-        val item = parent?.adapter?.getItem(position) as String
-        Log.d(TAG, "onItemSelected(item: $item)")
+        droneId = parent?.adapter?.getItem(position) as String
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
