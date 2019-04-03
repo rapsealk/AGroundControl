@@ -6,9 +6,13 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.rapsealk.agroundcontrol.data.GlobalPosition
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnItemSelectedListener {
+class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnItemSelectedListener, OnMapReadyCallback {
 
     private val TAG = MainActivity::class.java.simpleName
 
@@ -16,7 +20,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private lateinit var droneIdSpinnerAdapter: ArrayAdapter<String>
 
     private lateinit var mqttUtil: MqttUtil
-    private var droneId: String = ""
+
+    private lateinit var mGoogleMap: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +31,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         droneIdSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         drone_id_spinner.adapter = droneIdSpinnerAdapter
         drone_id_spinner.onItemSelectedListener = this
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         //MqttUtil.updateDroneId(this)
 
@@ -42,13 +50,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
      * View.OnClickListener
      */
     override fun onClick(view: View) {
-        if (droneId.isEmpty()) return
+        if (mqttUtil.droneId.isEmpty()) return
 
         when (view.id) {
-            R.id.btn_arm -> { mqttUtil.arm(droneId) }
-            R.id.btn_disarm -> { mqttUtil.disarm(droneId) }
-            R.id.btn_takeoff -> { mqttUtil.takeoff(droneId) }
-            R.id.btn_land -> { mqttUtil.land(droneId) }
+            R.id.btn_arm        -> { mqttUtil.arm(mqttUtil.droneId) }
+            R.id.btn_disarm     -> { mqttUtil.disarm(mqttUtil.droneId) }
+            R.id.btn_takeoff    -> { mqttUtil.takeoff(mqttUtil.droneId) }
+            R.id.btn_land       -> { mqttUtil.land(mqttUtil.droneId) }
         }
     }
     // View.OnClickListener
@@ -58,7 +66,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
      */
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         Log.d(TAG, "onItemSelected(parent: $parent, view: $view, position: $position, id: $id)")
-        droneId = parent?.adapter?.getItem(position) as String
+        mqttUtil.droneId = parent?.adapter?.getItem(position) as String
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -66,9 +74,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     }
     // AdapterView.OnItemSelectedListener
 
-    public fun updateDroneId(droneId: String) {
+    /**
+     * OnMapReadyCallback
+     */
+    override fun onMapReady(map: GoogleMap) {
+        mGoogleMap = map
+
+    }
+    // OnMapReadyCallback
+
+    public fun notifyDroneId(droneId: String) {
         if (droneIdList.contains(droneId)) return
         droneIdSpinnerAdapter.add(droneId)
         droneIdSpinnerAdapter.notifyDataSetChanged()
+    }
+
+    public fun notifyGlobalPosition(globalPosition: GlobalPosition) {
+        tv_latitude.text = globalPosition.latitude.toString()
+        tv_longitude.text = globalPosition.longitude.toString()
+        tv_altitude.text = globalPosition.altitude.toString()
     }
 }

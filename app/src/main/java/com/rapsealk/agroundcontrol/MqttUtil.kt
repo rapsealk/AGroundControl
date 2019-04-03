@@ -3,6 +3,7 @@ package com.rapsealk.agroundcontrol
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
@@ -18,6 +19,10 @@ class MqttUtil(private val context: Context) : MqttCallback {
 
     private val MQTT_TOPIC = "heartbeat"
     private var client: MqttAndroidClient? = null
+
+    public var droneId = ""
+
+    private val gson = Gson()
 
     fun getClient(): MqttAndroidClient {
         if (client == null) {
@@ -97,13 +102,13 @@ class MqttUtil(private val context: Context) : MqttCallback {
     override fun messageArrived(topic: String, message: MqttMessage) {
         Log.d(TAG, "messageArrived(topic=$topic, message=$message")
 
-        val gson = Gson()
-
         when {
             topic == "heartbeat" -> {
                 val heartbeat = gson.fromJson(message.toString(), Heartbeat::class.java)
                 Log.d(TAG, "Heartbeat(timestamp=${heartbeat.timestamp}")
-                updateDroneId(heartbeat.hostname)
+                notifyDroneId(heartbeat.hostname)
+                if (heartbeat.hostname == droneId)
+                    notifyGlobalPosition(heartbeat.global_position)
             }
         }
 /*
@@ -126,7 +131,11 @@ class MqttUtil(private val context: Context) : MqttCallback {
     }
     // MqttCallback
 
-    fun updateDroneId(droneId: String) {
-        (context as MainActivity).updateDroneId(droneId)
+    private fun notifyDroneId(droneId: String) {
+        (context as MainActivity).notifyDroneId(droneId)
+    }
+
+    private fun notifyGlobalPosition(globalPosition: GlobalPosition) {
+        (context as MainActivity).notifyGlobalPosition(globalPosition)
     }
 }
