@@ -9,9 +9,9 @@ data class Heartbeat(
 )
 
 data class GlobalPosition(
-    val latitude: Float,
-    val longitude: Float,
-    val altitude: Float
+    val latitude: Double,
+    val longitude: Double,
+    val altitude: Double
 )
 
 data class Velocity(

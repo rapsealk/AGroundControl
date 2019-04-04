@@ -1,7 +1,10 @@
 package com.rapsealk.agroundcontrol
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -18,8 +21,12 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.rapsealk.agroundcontrol.data.GlobalPosition
+import com.rapsealk.agroundcontrol.data.Heartbeat
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnItemSelectedListener, OnMapReadyCallback {
@@ -28,6 +35,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
 
     companion object {
         private val REQUEST_PERMISSION_LOCATION = 0x0001
+        private val REQUEST_MISSION_WAYPOINTS   = 0x1001
     }
 
     val droneIdList = arrayListOf("")
@@ -37,6 +45,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
 
     private lateinit var mGoogleMap: GoogleMap
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
+    private val droneMarkers = HashMap<String, Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,8 +107,34 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             //Toast.makeText(this@MainActivity, "(${it.latitude}, ${it.longitude}, ${it.altitude}) with acc: ${it.accuracy}", Toast.LENGTH_LONG).show()
             tv_latitude.text = it.latitude.toString()
             tv_longitude.text = it.longitude.toString()
-            tv_altitude.text = it.altitude.toString()
+            tv_altitude.text = String.format("%.6f", it.altitude)
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 16f))
+            // FIXME: sample marker
+            val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow), 108, 108, true)
+            val markerOptions = MarkerOptions()
+                .position(LatLng(it.latitude, it.longitude))
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_drone))
+            val marker = mGoogleMap.addMarker(markerOptions)
+            marker.tag = "Drone ID #01"
+            /*
+            Thread {
+                while (true) {
+                    marker.rotation = (Math.random().toFloat() * 1000) % 360
+                    Thread.sleep(3000)
+                }
+            }.start()
+            */
+            mGoogleMap.addMarker(MarkerOptions()
+                .position(LatLng(it.latitude+0.0008, it.longitude+0.0016))
+                .rotation(Math.random().toFloat() * 1000 % 360)
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
+                .tag = "Drone ID #02"
+            mGoogleMap.addMarker(MarkerOptions()
+                .position(LatLng(it.latitude-0.0014, it.longitude-0.0012))
+                .rotation(Math.random().toFloat() * 1000 % 360)
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
+                .tag = "Drone ID #03"
         }.addOnFailureListener {
             Toast.makeText(this@MainActivity, "Failed to get last location..", Toast.LENGTH_LONG).show()
             it.printStackTrace()
@@ -138,20 +173,58 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
      * OnMapReadyCallback
      */
     override fun onMapReady(map: GoogleMap) {
-        mGoogleMap = map
+        map.setOnMarkerClickListener(object: GoogleMap.OnMarkerClickListener {
+            override fun onMarkerClick(marker: Marker): Boolean {
+                Log.d(TAG, "OnMarkerClick(marker: $marker)")
+                val intent = Intent(this@MainActivity, MissionActivity::class.java)
+                    .putExtra("droneId", marker.tag as String)
+                    .putExtra("center", marker.position)
+                startActivityForResult(intent, REQUEST_MISSION_WAYPOINTS)
+                return true
+            }
+        })
 
+        mGoogleMap = map
     }
     // OnMapReadyCallback
 
-    public fun notifyDroneId(droneId: String) {
-        if (droneIdList.contains(droneId)) return
-        droneIdSpinnerAdapter.add(droneId)
-        droneIdSpinnerAdapter.notifyDataSetChanged()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            REQUEST_MISSION_WAYPOINTS -> {
+                if (resultCode == RESULT_OK) {
+                    val mission = data?.extras?.getParcelableArray("mission")?.map { it as LatLng }
+                    mission?.forEach { Log.d(TAG, "mission: ${it.latitude}, ${it.longitude}")}
+                    // TODO: Publish mqtt
+                    //mqttUtil.publishMessage()
+                }
+            }
+        }
+    }
+
+    public fun notifyHeartbeat(heartbeat: Heartbeat) {
+        val droneId = heartbeat.hostname
+        if (!droneIdList.contains(droneId)) {
+            droneIdSpinnerAdapter.add(droneId)
+            droneIdSpinnerAdapter.notifyDataSetChanged()
+        }
+
+        if (!droneMarkers.containsKey(droneId)) {
+            Toast.makeText(this@MainActivity, "new marker @ (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})", Toast.LENGTH_LONG).show()
+            Log.d(TAG, "new marker @ (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})")
+            val markerOptions = MarkerOptions()
+                .position(LatLng(heartbeat.global_position.latitude, heartbeat.global_position.longitude))
+                .title("${heartbeat.hostname} (${heartbeat.leader})")
+            droneMarkers[droneId] = mGoogleMap.addMarker(markerOptions)
+            droneMarkers[droneId]?.tag = droneId
+        }
+        Log.d(TAG, "Update marker position to (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})")
+        droneMarkers[droneId]?.position = LatLng(heartbeat.global_position.latitude, heartbeat.global_position.longitude)
     }
 
     public fun notifyGlobalPosition(globalPosition: GlobalPosition) {
         tv_latitude.text = globalPosition.latitude.toString()
         tv_longitude.text = globalPosition.longitude.toString()
-        tv_altitude.text = globalPosition.altitude.toString()
+        tv_altitude.text = String.format("%.6f", globalPosition.altitude)
     }
 }

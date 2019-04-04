@@ -106,7 +106,7 @@ class MqttUtil(private val context: Context) : MqttCallback {
             topic == "heartbeat" -> {
                 val heartbeat = gson.fromJson(message.toString(), Heartbeat::class.java)
                 Log.d(TAG, "Heartbeat(timestamp=${heartbeat.timestamp}")
-                notifyDroneId(heartbeat.hostname)
+                notifyHeartbeat(heartbeat)
                 if (heartbeat.hostname == droneId)
                     notifyGlobalPosition(heartbeat.global_position)
             }
@@ -131,8 +131,8 @@ class MqttUtil(private val context: Context) : MqttCallback {
     }
     // MqttCallback
 
-    private fun notifyDroneId(droneId: String) {
-        (context as MainActivity).notifyDroneId(droneId)
+    private fun notifyHeartbeat(heartbeat: Heartbeat) {
+        (context as MainActivity).notifyHeartbeat(heartbeat)
     }
 
     private fun notifyGlobalPosition(globalPosition: GlobalPosition) {
