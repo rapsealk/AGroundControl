@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.CompoundButton
 import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -29,7 +30,8 @@ import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnItemSelectedListener, OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), View.OnClickListener,
+    CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener, OnMapReadyCallback {
 
     private val TAG = MainActivity::class.java.simpleName
 
@@ -64,10 +66,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         mqttUtil = MqttUtil(this)
         val mqttClient = mqttUtil.getClient()
 
+        cb_leader.setOnCheckedChangeListener(this)
+
         btn_arm.setOnClickListener(this)
         btn_disarm.setOnClickListener(this)
         btn_takeoff.setOnClickListener(this)
         btn_land.setOnClickListener(this)
+        btn_start.setOnClickListener(this)
 
         checkPermission()
     }
@@ -152,9 +157,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             R.id.btn_disarm     -> { mqttUtil.disarm(mqttUtil.droneId) }
             R.id.btn_takeoff    -> { mqttUtil.takeoff(mqttUtil.droneId) }
             R.id.btn_land       -> { mqttUtil.land(mqttUtil.droneId) }
+            R.id.btn_start      -> { mqttUtil.start(droneIdList) }
         }
     }
     // View.OnClickListener
+
+    /**
+     * CompoundButton.OnCheckedChangeListener
+     */
+    override fun onCheckedChanged(button: CompoundButton, checked: Boolean) {
+        Log.d(TAG, "button.isChecked: ${button.isChecked}")
+        Log.d(TAG, "isChecked: $checked")
+        mqttUtil.assignLeader(mqttUtil.droneId, button.isChecked)
+    }
+    // CompoundButton.OnCheckedChangeListener
 
     /**
      * AdapterView.OnItemSelectedListener
@@ -193,10 +209,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         when (requestCode) {
             REQUEST_MISSION_WAYPOINTS -> {
                 if (resultCode == RESULT_OK) {
+                    val droneId = data?.getStringExtra("droneId")
                     val mission = data?.extras?.getParcelableArray("mission")?.map { it as LatLng }
                     mission?.forEach { Log.d(TAG, "mission: ${it.latitude}, ${it.longitude}")}
                     // TODO: Publish mqtt
-                    //mqttUtil.publishMessage()
+                    val msgstr = "{ \"waypoints\": [" + mission?.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }?.joinToString(",") + "] }"
+                    mqttUtil.publishMessage("mission_upload/$droneId", msgstr)
                 }
             }
         }
@@ -222,9 +240,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         droneMarkers[droneId]?.position = LatLng(heartbeat.global_position.latitude, heartbeat.global_position.longitude)
     }
 
+    public fun notifyLeader(leader: Boolean) {
+        cb_leader.isChecked = leader
+    }
+
     public fun notifyGlobalPosition(globalPosition: GlobalPosition) {
         tv_latitude.text = globalPosition.latitude.toString()
         tv_longitude.text = globalPosition.longitude.toString()
         tv_altitude.text = String.format("%.6f", globalPosition.altitude)
+    }
+
+    public fun notifyMavrosState(mavrosState: String) {
+        tv_status_message.text = mavrosState
+    }
+
+    public fun notifyCommandResult(commandResult: String) {
+        tv_command_result_message.text = commandResult
     }
 }

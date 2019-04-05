@@ -19,6 +19,7 @@ class MissionActivity : AppCompatActivity(), View.OnClickListener, OnMapReadyCal
 
     private lateinit var mGoogleMap: GoogleMap
 
+    private var droneId: String = ""
     private var center: LatLng = LatLng(0.0, 0.0)
     private val mMarkers = ArrayList<Marker>()
     private var mPolyline: Polyline? = null
@@ -27,7 +28,7 @@ class MissionActivity : AppCompatActivity(), View.OnClickListener, OnMapReadyCal
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mission)
 
-        val droneId = intent.getStringExtra("droneId")
+        droneId = intent.getStringExtra("droneId")
         center = intent.extras?.getParcelable("center") as LatLng
         Log.d(TAG, "Drone ID: $droneId")
 
@@ -72,6 +73,7 @@ class MissionActivity : AppCompatActivity(), View.OnClickListener, OnMapReadyCal
             }
             R.id.btn_allocate -> {
                 val intent = Intent()
+                intent.putExtra("droneId", droneId)
                 intent.putExtra("mission", mMarkers.map { it.position }.toTypedArray())
                 setResult(RESULT_OK, intent)
                 finish()

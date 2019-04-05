@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
+import com.rapsealk.agroundcontrol.data.Message
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
@@ -17,10 +18,20 @@ class MqttUtil(private val context: Context) : MqttCallback {
         private val EmptyMessage = "{}"
     }
 
-    private val MQTT_TOPIC = "heartbeat"
+    object MQTT_TOPIC {
+        private val HEARTBEAT       = "heartbeat"
+        private val STATUS          = "status"
+        private val COMMAND_RESULT  = "command_result"
+    }
+
     private var client: MqttAndroidClient? = null
 
     public var droneId = ""
+        set(value) {
+            client?.unsubscribe("command_result/$field")
+            field = value
+            client?.subscribe("command_result/$value", 2)
+        }
 
     private val gson = Gson()
 
@@ -73,6 +84,11 @@ class MqttUtil(private val context: Context) : MqttCallback {
         }
     }
 
+    public fun assignLeader(droneId: String, leader: Boolean) {
+        val message = "{ \"leader\": $leader }"
+        publishMessage("assign_leader/$droneId", message)
+    }
+
     public fun arm(droneId: String) {
         publishMessage("arm/$droneId")
     }
@@ -87,6 +103,10 @@ class MqttUtil(private val context: Context) : MqttCallback {
 
     public fun land(droneId: String) {
         publishMessage("land/$droneId")
+    }
+
+    public fun start(droneIdList: List<String>) {
+        droneIdList.forEach { publishMessage("flocking_flight/$it") }
     }
 
     fun close() {
@@ -107,8 +127,19 @@ class MqttUtil(private val context: Context) : MqttCallback {
                 val heartbeat = gson.fromJson(message.toString(), Heartbeat::class.java)
                 Log.d(TAG, "Heartbeat(timestamp=${heartbeat.timestamp}")
                 notifyHeartbeat(heartbeat)
-                if (heartbeat.hostname == droneId)
+                if (heartbeat.hostname == droneId) {
+                    notifyLeader(heartbeat.leader)
                     notifyGlobalPosition(heartbeat.global_position)
+                }
+            }
+            /*
+            topic.startsWith("mavros/state") -> {
+                val mavrosState =
+            }*/
+            topic.startsWith("command_result") -> {
+                val commandResult = gson.fromJson(message.toString(), Message::class.java)
+                if (commandResult.hostname == droneId)
+                    notifyCommandResult(commandResult.message)
             }
         }
 /*
@@ -135,7 +166,19 @@ class MqttUtil(private val context: Context) : MqttCallback {
         (context as MainActivity).notifyHeartbeat(heartbeat)
     }
 
+    private fun notifyLeader(leader: Boolean) {
+        (context as MainActivity).notifyLeader(leader)
+    }
+
     private fun notifyGlobalPosition(globalPosition: GlobalPosition) {
         (context as MainActivity).notifyGlobalPosition(globalPosition)
+    }
+
+    private fun notifyMavrosState(mavrosState: String) {
+        (context as MainActivity).notifyMavrosState(mavrosState)
+    }
+
+    private fun notifyCommandResult(commandResult: String) {
+        (context as MainActivity).notifyCommandResult(commandResult)
     }
 }

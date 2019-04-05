@@ -58,10 +58,28 @@
             android:paddingBottom="18dp"
             android:background="@color/colorAccent">
 
+        <!-- CheckedTextView -->
+        <TextView
+                android:id="@+id/tv_leader_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="leader"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+                android:id="@+id/cb_leader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/tv_leader_tag"
+                app:layout_constraintEnd_toEndOf="@id/tv_leader_tag"
+                app:layout_constraintTop_toBottomOf="@id/tv_leader_tag"/>
+
         <TextView
                 android:id="@+id/tv_latitude_tag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/tv_longitude_tag"
                 android:text="latitude"
@@ -82,6 +100,7 @@
                 android:id="@+id/tv_longitude_tag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@id/tv_latitude_tag"
                 app:layout_constraintEnd_toStartOf="@id/tv_altitude_tag"
                 android:text="longitude"
@@ -102,6 +121,7 @@
                 android:id="@+id/tv_altitude_tag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toEndOf="@id/tv_longitude_tag"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:text="altitude"
@@ -117,6 +137,29 @@
                 app:layout_constraintEnd_toEndOf="@id/tv_altitude_tag"
                 android:text="0.0"
                 android:textSize="14sp"/>
+
+        <TextView
+                android:id="@+id/tv_status_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/tv_command_result_message"
+                android:text="STATUS_MESSAGE"
+                android:textStyle="bold"
+                android:textColor="#444444"/>
+
+        <TextView
+                android:id="@+id/tv_command_result_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/map"
+                android:layout_marginBottom="16dp"
+                android:text="COMMAND_RESULT_MESSAGE"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"/>
 
         <fragment
                 android:id="@+id/map"
@@ -144,6 +187,7 @@
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 app:layout_constraintWidth_percent="0.5"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:text="Arm"/>
 
@@ -152,6 +196,7 @@
                 android:layout_width="0dp"
                 android:layout_height="64dp"
                 app:layout_constraintWidth_percent="0.5"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:text="Disarm"/>
 
@@ -172,6 +217,15 @@
                 app:layout_constraintTop_toBottomOf="@id/btn_disarm"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:text="Land"/>
+
+        <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_start"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                app:layout_constraintWidth_percent="0.5"
+                app:layout_constraintTop_toBottomOf="@id/btn_takeoff"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="Start"/>
 
     </android.support.constraint.ConstraintLayout>
 
