@@ -113,9 +113,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             tv_latitude.text = it.latitude.toString()
             tv_longitude.text = it.longitude.toString()
             tv_altitude.text = String.format("%.6f", it.altitude)
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 16f))
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 20f))
             // FIXME: sample marker
-            val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.arrow), 108, 108, true)
+            val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.drone), 128, 128, true)
             val markerOptions = MarkerOptions()
                 .position(LatLng(it.latitude, it.longitude))
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
@@ -131,12 +131,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             }.start()
             */
             mGoogleMap.addMarker(MarkerOptions()
-                .position(LatLng(it.latitude+0.0008, it.longitude+0.0016))
+                .position(LatLng(it.latitude+0.00004, it.longitude-0.00004))
                 .rotation(Math.random().toFloat() * 1000 % 360)
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
                 .tag = "Drone ID #02"
             mGoogleMap.addMarker(MarkerOptions()
-                .position(LatLng(it.latitude-0.0014, it.longitude-0.0012))
+                .position(LatLng(it.latitude-0.00004, it.longitude-0.00004))
                 .rotation(Math.random().toFloat() * 1000 % 360)
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
                 .tag = "Drone ID #03"
@@ -245,8 +245,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     public fun notifyGlobalPosition(globalPosition: GlobalPosition) {
-        tv_latitude.text = globalPosition.latitude.toString()
-        tv_longitude.text = globalPosition.longitude.toString()
+        tv_latitude.text = String.format("%.6f", globalPosition.latitude)
+        tv_longitude.text = String.format("%.6f", globalPosition.longitude)
         tv_altitude.text = String.format("%.6f", globalPosition.altitude)
     }
 

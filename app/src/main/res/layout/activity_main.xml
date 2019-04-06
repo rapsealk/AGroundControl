@@ -13,6 +13,9 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:elevation="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             android:background="@color/colorPrimary">
 
         <android.support.constraint.ConstraintLayout
@@ -40,7 +43,17 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    android:background="@color/colorAccent"/>
+                    style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+                    android:background="@color/colorPrimary"/>
+
+            <ImageView
+                    android:layout_width="128dp"
+                    android:layout_height="3px"
+                    android:layout_marginEnd="12dp"
+                    app:layout_constraintStart_toStartOf="@id/drone_id_spinner"
+                    app:layout_constraintEnd_toEndOf="@id/drone_id_spinner"
+                    app:layout_constraintTop_toBottomOf="@id/drone_id_spinner"
+                    android:src="@android:color/black"/>
 
         </android.support.constraint.ConstraintLayout>
 
@@ -52,19 +65,20 @@
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toTopOf="@id/btn_layout"
-            android:paddingStart="36dp"
-            android:paddingEnd="36dp"
-            android:paddingTop="18dp"
-            android:paddingBottom="18dp"
-            android:background="@color/colorAccent">
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:background="@drawable/gradation">
 
         <!-- CheckedTextView -->
         <TextView
                 android:id="@+id/tv_leader_tag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:textColor="@android:color/black"
                 android:text="leader"/>
 
         <android.support.v7.widget.AppCompatCheckBox
@@ -75,68 +89,108 @@
                 app:layout_constraintEnd_toEndOf="@id/tv_leader_tag"
                 app:layout_constraintTop_toBottomOf="@id/tv_leader_tag"/>
 
-        <TextView
-                android:id="@+id/tv_latitude_tag"
-                android:layout_width="wrap_content"
+        <android.support.constraint.ConstraintLayout
+                android:id="@+id/global_position_layout"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintWidth_percent="0.8"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/tv_longitude_tag"
-                android:text="latitude"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
+                app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-                android:id="@+id/tv_latitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/tv_latitude_tag"
-                app:layout_constraintStart_toStartOf="@id/tv_latitude_tag"
-                app:layout_constraintEnd_toEndOf="@id/tv_latitude_tag"
-                android:text="0.0"
-                android:textSize="14sp"/>
+            <TextView
+                    android:id="@+id/tv_latitude_tag"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintWidth_percent="0.33"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_longitude_tag"
+                    android:textColor="@android:color/black"
+                    android:text="latitude"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
 
-        <TextView
-                android:id="@+id/tv_longitude_tag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tv_latitude_tag"
-                app:layout_constraintEnd_toStartOf="@id/tv_altitude_tag"
-                android:text="longitude"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
+            <TextView
+                    android:id="@+id/tv_latitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/tv_latitude_tag"
+                    app:layout_constraintStart_toStartOf="@id/tv_latitude_tag"
+                    android:textColor="@android:color/black"
+                    android:text="0.0"
+                    android:textSize="14sp"/>
 
-        <TextView
-                android:id="@+id/tv_longitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/tv_longitude_tag"
-                app:layout_constraintStart_toStartOf="@id/tv_longitude_tag"
-                app:layout_constraintEnd_toEndOf="@id/tv_longitude_tag"
-                android:text="0.0"
-                android:textSize="14sp"/>
+            <TextView
+                    android:id="@+id/tv_longitude_tag"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintWidth_percent="0.33"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tv_latitude_tag"
+                    app:layout_constraintEnd_toStartOf="@id/tv_altitude_tag"
+                    android:textColor="@android:color/black"
+                    android:text="longitude"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
 
-        <TextView
-                android:id="@+id/tv_altitude_tag"
-                android:layout_width="wrap_content"
+            <TextView
+                    android:id="@+id/tv_longitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/tv_longitude_tag"
+                    app:layout_constraintStart_toStartOf="@id/tv_longitude_tag"
+                    android:textColor="@android:color/black"
+                    android:text="0.0"
+                    android:textSize="14sp"/>
+
+            <TextView
+                    android:id="@+id/tv_altitude_tag"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintWidth_percent="0.33"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tv_longitude_tag"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
+                    android:textColor="@android:color/black"
+                    android:text="altitude"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+            <TextView
+                    android:id="@+id/tv_altitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/tv_altitude_tag"
+                    app:layout_constraintStart_toStartOf="@id/tv_altitude_tag"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
+                    android:textColor="@android:color/black"
+                    android:text="0.0"
+                    android:textSize="14sp"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+        <ImageView
+                android:id="@+id/iv_battery"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tv_longitude_tag"
+                app:layout_constraintStart_toEndOf="@id/global_position_layout"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:text="altitude"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
+                app:layout_constraintTop_toTopOf="@id/global_position_layout"
+                android:src="@drawable/ic_battery"/>
 
         <TextView
-                android:id="@+id/tv_altitude"
+                android:id="@+id/tv_battery"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/tv_altitude_tag"
-                app:layout_constraintStart_toStartOf="@id/tv_altitude_tag"
-                app:layout_constraintEnd_toEndOf="@id/tv_altitude_tag"
-                android:text="0.0"
-                android:textSize="14sp"/>
+                app:layout_constraintTop_toBottomOf="@id/iv_battery"
+                app:layout_constraintStart_toStartOf="@id/iv_battery"
+                app:layout_constraintEnd_toEndOf="@id/iv_battery"
+                android:textColor="@android:color/black"
+                android:text="100%"
+                android:textSize="10sp"/>
 
         <TextView
                 android:id="@+id/tv_status_message"
@@ -166,7 +220,7 @@
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.5"
+                app:layout_constraintHeight_percent="0.75"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -179,52 +233,73 @@
             android:id="@+id/btn_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.3"
+            app:layout_constraintHeight_percent="0.175"
             app:layout_constraintBottom_toBottomOf="parent">
 
-        <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_arm"
+        <android.support.constraint.ConstraintLayout
+                android:id="@+id/btn_pairs_layout"
                 android:layout_width="0dp"
-                android:layout_height="64dp"
-                app:layout_constraintWidth_percent="0.5"
-                app:layout_constraintTop_toTopOf="parent"
+                android:layout_height="match_parent"
+                app:layout_constraintWidth_percent="0.8"
                 app:layout_constraintStart_toStartOf="parent"
-                android:text="Arm"/>
-
-        <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_disarm"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                app:layout_constraintWidth_percent="0.5"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:text="Disarm"/>
+                app:layout_constraintBottom_toBottomOf="parent">
 
-        <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_takeoff"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                app:layout_constraintWidth_percent="0.5"
-                app:layout_constraintTop_toBottomOf="@id/btn_arm"
-                app:layout_constraintStart_toStartOf="parent"
-                android:text="Takeoff"/>
+            <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/btn_arm"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintWidth_percent="0.5"
+                    app:layout_constraintHeight_percent="0.5"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:backgroundTint="@color/colorAccent"
+                    android:text="Arm"/>
 
-        <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_land"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                app:layout_constraintWidth_percent="0.5"
-                app:layout_constraintTop_toBottomOf="@id/btn_disarm"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:text="Land"/>
+            <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/btn_disarm"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintWidth_percent="0.5"
+                    app:layout_constraintHeight_percent="0.5"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:backgroundTint="@color/colorAccent"
+                    android:text="Disarm"/>
+
+            <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/btn_takeoff"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintWidth_percent="0.5"
+                    app:layout_constraintHeight_percent="0.5"
+                    app:layout_constraintTop_toBottomOf="@id/btn_arm"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:backgroundTint="@color/colorAccent"
+                    android:text="Takeoff"/>
+
+            <android.support.v7.widget.AppCompatButton
+                    android:id="@+id/btn_land"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintWidth_percent="0.5"
+                    app:layout_constraintHeight_percent="0.5"
+                    app:layout_constraintTop_toBottomOf="@id/btn_disarm"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:backgroundTint="@color/colorAccent"
+                    android:text="Land"/>
+
+        </android.support.constraint.ConstraintLayout>
 
         <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_start"
                 android:layout_width="0dp"
-                android:layout_height="64dp"
-                app:layout_constraintWidth_percent="0.5"
-                app:layout_constraintTop_toBottomOf="@id/btn_takeoff"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btn_pairs_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:backgroundTint="@color/colorAccent"
                 android:text="Start"/>
 
     </android.support.constraint.ConstraintLayout>
