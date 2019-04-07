@@ -12,10 +12,10 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.7"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/btn_layout"
             tools:context="com.rapsealk.agroundcontrol.MissionActivity"/>
 
     <android.support.v7.widget.AppCompatImageView
@@ -28,7 +28,6 @@
             android:src="@drawable/target"/>
 
     <android.support.constraint.ConstraintLayout
-            android:id="@+id/button_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_percent="0.075"
@@ -49,16 +48,50 @@
                 android:enabled="false"
                 android:text="추가"/>
 
+        <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_remove"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintWidth_percent="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="gone"
+                android:text="삭제"/>
+
     </android.support.constraint.ConstraintLayout>
 
-    <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_allocate"
+    <android.support.constraint.ConstraintLayout
+            android:id="@+id/btn_layout"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:backgroundTint="@color/colorAccent"
-            android:text="등록"/>
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_cancel"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                app:layout_constraintWidth_percent="0.2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@android:color/transparent"
+                android:text="취소"/>
+
+        <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_allocate"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                app:layout_constraintWidth_percent="0.8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:backgroundTint="@color/colorAccent"
+                android:text="등록"/>
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

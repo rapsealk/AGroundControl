@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         val mqttClient = mqttUtil.getClient()
 
         cb_leader.setOnCheckedChangeListener(this)
+        btn_log.setOnClickListener(this)
 
         btn_arm.setOnClickListener(this)
         btn_disarm.setOnClickListener(this)
@@ -120,8 +121,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 .position(LatLng(it.latitude, it.longitude))
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
                 //.icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_drone))
-            val marker = mGoogleMap.addMarker(markerOptions)
+            var marker = mGoogleMap.addMarker(markerOptions)
             marker.tag = "Drone ID #01"
+            droneMarkers[marker.tag as String] = marker
             /*
             Thread {
                 while (true) {
@@ -130,16 +132,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 }
             }.start()
             */
-            mGoogleMap.addMarker(MarkerOptions()
+            marker = mGoogleMap.addMarker(MarkerOptions()
                 .position(LatLng(it.latitude+0.00004, it.longitude-0.00004))
                 .rotation(Math.random().toFloat() * 1000 % 360)
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
-                .tag = "Drone ID #02"
-            mGoogleMap.addMarker(MarkerOptions()
+            marker.tag = "Drone ID #02"
+            droneMarkers[marker.tag as String] = marker
+            marker = mGoogleMap.addMarker(MarkerOptions()
                 .position(LatLng(it.latitude-0.00004, it.longitude-0.00004))
                 .rotation(Math.random().toFloat() * 1000 % 360)
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap)))
-                .tag = "Drone ID #03"
+            marker.tag = "Drone ID #03"
+            droneMarkers[marker.tag as String] = marker
         }.addOnFailureListener {
             Toast.makeText(this@MainActivity, "Failed to get last location..", Toast.LENGTH_LONG).show()
             it.printStackTrace()
@@ -153,6 +157,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         if (mqttUtil.droneId.isEmpty()) return
 
         when (view.id) {
+            R.id.btn_log        -> { /* TODO: FragmentDialog */ }
             R.id.btn_arm        -> { mqttUtil.arm(mqttUtil.droneId) }
             R.id.btn_disarm     -> { mqttUtil.disarm(mqttUtil.droneId) }
             R.id.btn_takeoff    -> { mqttUtil.takeoff(mqttUtil.droneId) }
@@ -199,6 +204,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 return true
             }
         })
+        map.setOnCameraIdleListener {
+            val size = (128 * (map.cameraPosition.zoom / 20f)).toInt()
+            val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.drone), size, size, true)
+            droneMarkers.values.forEach { it.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap)) }
+        }
 
         mGoogleMap = map
     }

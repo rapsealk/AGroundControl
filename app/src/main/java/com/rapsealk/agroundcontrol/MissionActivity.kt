@@ -22,6 +22,7 @@ class MissionActivity : AppCompatActivity(), View.OnClickListener, OnMapReadyCal
     private var droneId: String = ""
     private var center: LatLng = LatLng(0.0, 0.0)
     private val mMarkers = ArrayList<Marker>()
+    private var mMarker: Marker? = null
     private var mPolyline: Polyline? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +37,9 @@ class MissionActivity : AppCompatActivity(), View.OnClickListener, OnMapReadyCal
         mapFragment.getMapAsync(this)
 
         btn_add.setOnClickListener(this)
+        btn_remove.setOnClickListener(this)
         btn_allocate.setOnClickListener(this)
+        btn_cancel.setOnClickListener(this)
     }
 
     /**
@@ -71,11 +74,17 @@ class MissionActivity : AppCompatActivity(), View.OnClickListener, OnMapReadyCal
                 mMarkers.add(marker)
                 drawPolyline()
             }
+            R.id.btn_remove -> {
+
+            }
             R.id.btn_allocate -> {
                 val intent = Intent()
                 intent.putExtra("droneId", droneId)
                 intent.putExtra("mission", mMarkers.map { it.position }.toTypedArray())
                 setResult(RESULT_OK, intent)
+                finish()
+            }
+            R.id.btn_cancel -> {
                 finish()
             }
         }
