@@ -58,16 +58,26 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         drone_id_spinner.adapter = droneIdSpinnerAdapter
         drone_id_spinner.onItemSelectedListener = this
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-
         //MqttUtil.updateDroneId(this)
 
         mqttUtil = MqttUtil(this)
         val mqttClient = mqttUtil.getClient()
 
         cb_leader.setOnCheckedChangeListener(this)
-        btn_log.setOnClickListener(this)
+        btn_log.setOnClickListener {
+            /*
+            val fragment = LogFragment()
+            fragment.show(supportFragmentManager, LogFragment.TAG)
+            Log.d(TAG, "fragment.dialog: ${fragment.dialog} / fragment.dialog.window: ${fragment.dialog?.window}")
+            fragment.dialog?.window?.apply {
+                val layoutParams = this.attributes
+                layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
+                layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
+                this.attributes = layoutParams
+            }
+            */
+            LogFragment().show(supportFragmentManager, LogFragment.TAG)
+        }
 
         btn_arm.setOnClickListener(this)
         btn_disarm.setOnClickListener(this)
@@ -83,7 +93,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         when (requestCode) {
             REQUEST_PERMISSION_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                    init()
+                    initMap()
                 } else {
                     val snackbar = Snackbar.make(root_view, "권한 획득에 실패했습니다.", Snackbar.LENGTH_INDEFINITE)
                     snackbar.setAction("다시하기") {
@@ -103,7 +113,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             ActivityCompat.requestPermissions(this@MainActivity, permissions, REQUEST_PERMISSION_LOCATION)
         } else {
             // permission already granted
-            init()
+            initMap()
         }
     }
 
@@ -150,6 +160,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
     }
 
+    private fun initMap() {
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
+
     /**
      * View.OnClickListener
      */
@@ -157,7 +172,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         if (mqttUtil.droneId.isEmpty()) return
 
         when (view.id) {
-            R.id.btn_log        -> { /* TODO: FragmentDialog */ }
             R.id.btn_arm        -> { mqttUtil.arm(mqttUtil.droneId) }
             R.id.btn_disarm     -> { mqttUtil.disarm(mqttUtil.droneId) }
             R.id.btn_takeoff    -> { mqttUtil.takeoff(mqttUtil.droneId) }
@@ -211,6 +225,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
 
         mGoogleMap = map
+
+        init()
     }
     // OnMapReadyCallback
 

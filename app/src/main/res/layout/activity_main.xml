@@ -265,8 +265,7 @@
                 app:layout_constraintEnd_toEndOf="@id/map"
                 app:layout_constraintBottom_toBottomOf="@id/map"
                 android:text="LOG"
-                android:textStyle="bold"
-                android:background="@android:color/transparent"/>
+                android:textStyle="bold"/>
 
     </android.support.constraint.ConstraintLayout>
 
