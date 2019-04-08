@@ -5,8 +5,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Icon
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -36,11 +38,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private val TAG = MainActivity::class.java.simpleName
 
     companion object {
-        private val REQUEST_PERMISSION_LOCATION = 0x0001
-        private val REQUEST_MISSION_WAYPOINTS   = 0x1001
+        private const val REQUEST_PERMISSION_LOCATION = 0x0001
+        private const val REQUEST_MISSION_WAYPOINTS   = 0x1001
     }
 
-    val droneIdList = arrayListOf("")
+    private val droneIdList = arrayListOf("")
     private lateinit var droneIdSpinnerAdapter: ArrayAdapter<String>
 
     private lateinit var mqttUtil: MqttUtil
@@ -48,6 +50,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private lateinit var mGoogleMap: GoogleMap
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val droneMarkers = HashMap<String, Marker>()
+
+    private val mLogs = ArrayList<String>()
+    private var clickCounter = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +81,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 this.attributes = layoutParams
             }
             */
-            LogFragment().show(supportFragmentManager, LogFragment.TAG)
+            log_layout.visibility = ConstraintLayout.VISIBLE // xor ConstraintLayout.GONE
+            //mLogs.add("Clicked #${++clickCounter}")
+            //LogFragment().setItems(mLogs).show(supportFragmentManager, LogFragment.TAG)
         }
 
         btn_arm.setOnClickListener(this)
@@ -282,5 +289,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
     public fun notifyCommandResult(commandResult: String) {
         tv_command_result_message.text = commandResult
+    }
+
+    fun notifyBattery(percentage: Float) {
+        tv_battery.text = "$percentage%%"
+        iv_battery.setImageIcon(Icon.createWithResource(this@MainActivity, when {
+            percentage == 100f -> { R.drawable.ic_battery_cell_4 }
+            75f <= percentage && percentage < 100f -> { R.drawable.ic_battery_cell_3 }
+            50f <= percentage && percentage < 75f -> { R.drawable.ic_battery_cell_2 }
+            25f <= percentage && percentage < 50f -> { R.drawable.ic_battery_cell_1 }
+            10f <= percentage && percentage < 25f -> { R.drawable.ic_battery_cell_0 }
+            else -> { R.drawable.ic_battery_cell_0_red }
+        }))
     }
 }

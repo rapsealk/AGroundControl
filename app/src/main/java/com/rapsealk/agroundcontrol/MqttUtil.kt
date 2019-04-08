@@ -3,6 +3,7 @@ package com.rapsealk.agroundcontrol
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import com.rapsealk.agroundcontrol.data.BatteryMessage
 import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
 import com.rapsealk.agroundcontrol.data.Message
@@ -19,18 +20,22 @@ class MqttUtil(private val context: Context) : MqttCallback {
     }
 
     object MQTT_TOPIC {
-        private val HEARTBEAT       = "heartbeat"
-        private val STATUS          = "status"
-        private val COMMAND_RESULT  = "command_result"
+        const val HEARTBEAT         = "heartbeat"
+        const val STATE             = "mavros/state"
+        const val BATTERY           = "mavros/battery"
+        const val COMMAND_RESULT    = "command_result"
+
+        val TOPICS = arrayOf(STATE, COMMAND_RESULT)
     }
 
     private var client: MqttAndroidClient? = null
 
     public var droneId = ""
         set(value) {
-            client?.unsubscribe("command_result/$field")
+            MQTT_TOPIC.TOPICS.forEach {}
+            client?.unsubscribe(MQTT_TOPIC.TOPICS.map { "$it/$field" }.toTypedArray())
             field = value
-            client?.subscribe("command_result/$value", 2)
+            client?.subscribe(MQTT_TOPIC.TOPICS.map { "$it/$value" }.toTypedArray(), MQTT_TOPIC.TOPICS.map { 2 }.toIntArray())
         }
 
     private val gson = Gson()
@@ -141,6 +146,11 @@ class MqttUtil(private val context: Context) : MqttCallback {
                 if (commandResult.hostname == droneId)
                     notifyCommandResult(commandResult.message)
             }
+            topic.startsWith(MQTT_TOPIC.BATTERY) -> {
+                val result = gson.fromJson(message.toString(), BatteryMessage::class.java)
+                if (result.hostname == droneId)
+                    notifyBattery(result.percentage)
+            }
         }
 /*
         when {
@@ -180,5 +190,9 @@ class MqttUtil(private val context: Context) : MqttCallback {
 
     private fun notifyCommandResult(commandResult: String) {
         (context as MainActivity).notifyCommandResult(commandResult)
+    }
+
+    private fun notifyBattery(percentage: Float) {
+        (context as MainActivity).notifyBattery(percentage)
     }
 }

@@ -14,11 +14,13 @@ public class LogFragment : DialogFragment() {
         public val TAG = LogFragment::class.java.simpleName
     }
 
+    private var mItems: List<String> = ArrayList()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_log, container)
         val logRecyclerView = view.findViewById<RecyclerView>(R.id.log_recycler_view)
         logRecyclerView.layoutManager = LinearLayoutManager(context)
-        logRecyclerView.adapter = LogAdapter(arrayListOf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "BBBBBBBBBBBBBB"))
+        logRecyclerView.adapter = LogAdapter(mItems)
         return view
     }
 
@@ -33,4 +35,9 @@ public class LogFragment : DialogFragment() {
         dialog.window?.attributes = layoutParams
     }
     */
+
+    public fun setItems(items: List<String>): LogFragment {
+        this.mItems = items
+        return this
+    }
 }
