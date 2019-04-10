@@ -5,6 +5,13 @@ data class Message(
     val message: String
 )
 
+data class LogMessage(
+    val hostname: String,
+    val tag: String,
+    val message: String,
+    val timestamp: Double
+)
+
 data class StateMessage(
     val hostname: String,
     val connected: Boolean,

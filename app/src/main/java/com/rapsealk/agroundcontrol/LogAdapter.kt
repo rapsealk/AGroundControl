@@ -5,8 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.rapsealk.agroundcontrol.data.LogMessage
 
-public class LogAdapter(private val mItems: List<String> = ArrayList()) : RecyclerView.Adapter<LogAdapter.ViewHolder>() {
+public class LogAdapter(private val mItems: List<LogMessage> = ArrayList()) : RecyclerView.Adapter<LogAdapter.ViewHolder>() {
 
     override fun getItemCount(): Int = mItems.size
 
@@ -16,7 +17,9 @@ public class LogAdapter(private val mItems: List<String> = ArrayList()) : Recycl
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.message.text = mItems[position]
+        val log = mItems[position]
+        holder.timestamp.text = log.timestamp.toString()
+        holder.message.text = "[${log.tag}] ${log.message}"
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -12,6 +12,7 @@ import android.support.constraint.ConstraintLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -30,6 +31,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
+import com.rapsealk.agroundcontrol.data.LogMessage
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
@@ -51,8 +53,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val droneMarkers = HashMap<String, Marker>()
 
-    private val mLogs = ArrayList<String>()
-    private var clickCounter = 0
+    private val mLogs = ArrayList<LogMessage>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,23 +69,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         mqttUtil = MqttUtil(this)
         val mqttClient = mqttUtil.getClient()
 
-        cb_leader.setOnCheckedChangeListener(this)
-        btn_log.setOnClickListener {
-            /*
-            val fragment = LogFragment()
-            fragment.show(supportFragmentManager, LogFragment.TAG)
-            Log.d(TAG, "fragment.dialog: ${fragment.dialog} / fragment.dialog.window: ${fragment.dialog?.window}")
-            fragment.dialog?.window?.apply {
-                val layoutParams = this.attributes
-                layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT
-                layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT
-                this.attributes = layoutParams
-            }
-            */
-            log_layout.visibility = ConstraintLayout.VISIBLE // xor ConstraintLayout.GONE
-            //mLogs.add("Clicked #${++clickCounter}")
-            //LogFragment().setItems(mLogs).show(supportFragmentManager, LogFragment.TAG)
+        log_recycler_view.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = LogAdapter(mLogs)
         }
+
+        cb_leader.setOnCheckedChangeListener(this)
+        btn_log.setOnClickListener(this)
+        btn_ok.setOnClickListener(this)
 
         btn_arm.setOnClickListener(this)
         btn_disarm.setOnClickListener(this)
@@ -176,9 +168,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      * View.OnClickListener
      */
     override fun onClick(view: View) {
-        if (mqttUtil.droneId.isEmpty()) return
-
         when (view.id) {
+            R.id.btn_log        -> { log_layout.visibility = ConstraintLayout.VISIBLE }
+            R.id.btn_ok         -> { log_layout.visibility = ConstraintLayout.GONE }
             R.id.btn_arm        -> { mqttUtil.arm(mqttUtil.droneId) }
             R.id.btn_disarm     -> { mqttUtil.disarm(mqttUtil.droneId) }
             R.id.btn_takeoff    -> { mqttUtil.takeoff(mqttUtil.droneId) }
@@ -292,7 +284,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     fun notifyBattery(percentage: Float) {
-        tv_battery.text = "$percentage%%"
+        tv_battery.text = String.format(resources.getString(R.string.percentage), percentage)
         iv_battery.setImageIcon(Icon.createWithResource(this@MainActivity, when {
             percentage == 100f -> { R.drawable.ic_battery_cell_4 }
             75f <= percentage && percentage < 100f -> { R.drawable.ic_battery_cell_3 }
@@ -301,5 +293,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             10f <= percentage && percentage < 25f -> { R.drawable.ic_battery_cell_0 }
             else -> { R.drawable.ic_battery_cell_0_red }
         }))
+    }
+
+    fun notifyLog(message: LogMessage) {
+        mLogs.add(message)
+        log_recycler_view.adapter?.notifyDataSetChanged()
     }
 }

@@ -77,7 +77,6 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/tv_status_message"
-                app:layout_constraintBottom_toBottomOf="@id/tv_status_message"
                 android:textColor="@android:color/black"
                 android:text="leader"/>
 
@@ -263,6 +262,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="@id/map"
                 app:layout_constraintBottom_toBottomOf="@id/map"
+                android:background="@android:color/transparent"
                 android:text="LOG"
                 android:textStyle="bold"/>
 
@@ -350,7 +350,7 @@
             android:layout_height="0dp"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@android:color/darker_gray"
+            android:background="#88000000"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -363,9 +363,30 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:background="@android:color/holo_orange_light">
+                android:clickable="true"
+                android:alpha="1"
+                android:background="@color/colorAccentLight">
 
+            <android.support.v7.widget.RecyclerView
+                    android:id="@+id/log_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/btn_ok"/>
 
+            <Button
+                    android:id="@+id/btn_ok"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintWidth_percent="0.4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/colorAccent"
+                    android:text="확인"/>
 
         </android.support.constraint.ConstraintLayout>
 
