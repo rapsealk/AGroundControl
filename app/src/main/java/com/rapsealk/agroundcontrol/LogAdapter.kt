@@ -18,7 +18,7 @@ public class LogAdapter(private val mItems: List<LogMessage> = ArrayList()) : Re
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val log = mItems[position]
-        holder.timestamp.text = log.timestamp.toString()
+        holder.timestamp.text = String.format("%d", log.timestamp.toLong() % 10000)
         holder.message.text = "[${log.tag}] ${log.message}"
     }
 

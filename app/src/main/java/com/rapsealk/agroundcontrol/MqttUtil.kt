@@ -198,7 +198,7 @@ class MqttUtil(private val context: Context) : MqttCallback {
     }
 
     private fun notifyBattery(percentage: Float) {
-        (context as MainActivity).notifyBattery(percentage)
+        (context as MainActivity).notifyBattery(percentage * 100)
     }
 
     private fun notifyLog(message: LogMessage) {

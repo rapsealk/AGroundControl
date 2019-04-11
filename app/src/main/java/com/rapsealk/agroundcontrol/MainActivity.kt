@@ -286,11 +286,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     fun notifyBattery(percentage: Float) {
         tv_battery.text = String.format(resources.getString(R.string.percentage), percentage)
         iv_battery.setImageIcon(Icon.createWithResource(this@MainActivity, when {
-            percentage == 100f -> { R.drawable.ic_battery_cell_4 }
-            75f <= percentage && percentage < 100f -> { R.drawable.ic_battery_cell_3 }
-            50f <= percentage && percentage < 75f -> { R.drawable.ic_battery_cell_2 }
-            25f <= percentage && percentage < 50f -> { R.drawable.ic_battery_cell_1 }
-            10f <= percentage && percentage < 25f -> { R.drawable.ic_battery_cell_0 }
+            100f == percentage -> { R.drawable.ic_battery_cell_4 }
+            75f <= percentage -> { R.drawable.ic_battery_cell_3 }
+            50f <= percentage -> { R.drawable.ic_battery_cell_2 }
+            25f <= percentage -> { R.drawable.ic_battery_cell_1 }
+            10f <= percentage -> { R.drawable.ic_battery_cell_0 }
             else -> { R.drawable.ic_battery_cell_0_red }
         }))
     }
