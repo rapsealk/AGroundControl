@@ -25,10 +25,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
 import com.rapsealk.agroundcontrol.data.LogMessage
@@ -75,6 +72,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
 
         cb_leader.setOnCheckedChangeListener(this)
+        btn_home.setOnClickListener(this)
         btn_log.setOnClickListener(this)
         btn_ok.setOnClickListener(this)
 
@@ -157,6 +155,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     override fun onClick(view: View) {
         when (view.id) {
+            R.id.btn_home       -> {
+                droneMarkers[mqttUtil.droneId]?.position?.let {
+                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it))
+                }
+            }
             R.id.btn_log        -> { log_layout.visibility = ConstraintLayout.VISIBLE }
             R.id.btn_ok         -> { log_layout.visibility = ConstraintLayout.GONE }
             R.id.btn_arm        -> { mqttUtil.arm(mqttUtil.droneId) }
