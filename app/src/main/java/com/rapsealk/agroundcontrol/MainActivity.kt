@@ -1,13 +1,17 @@
 package com.rapsealk.agroundcontrol
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
@@ -247,6 +251,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }
 
         if (!droneMarkers.containsKey(droneId)) {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                vibrator.vibrate(500)
+            }
             Toast.makeText(this@MainActivity, "new marker @ (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})", Toast.LENGTH_LONG).show()
             Log.d(TAG, "new marker @ (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})")
             val markerOptions = MarkerOptions()
