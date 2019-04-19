@@ -171,6 +171,73 @@
 
         </android.support.constraint.ConstraintLayout>
 
+        <android.support.constraint.ConstraintLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintWidth_percent="0.8"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/global_position_layout">
+
+            <TextView
+                    android:id="@+id/tv_waypoint_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:text="Waypoint"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toEndOf="@id/tv_waypoint_tag"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginStart="8dp"
+                    android:text="[ 0 ]"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"/>
+
+            <TextView
+                    android:id="@+id/tv_waypoint_latitude"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintWidth_percent="0.33"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_waypoint_longitude"
+                    app:layout_constraintTop_toBottomOf="@id/tv_waypoint_tag"
+                    android:textColor="@android:color/black"
+                    android:text="0.0"
+                    android:textSize="14sp"/>
+
+            <TextView
+                    android:id="@+id/tv_waypoint_longitude"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintWidth_percent="0.33"
+                    app:layout_constraintStart_toEndOf="@id/tv_waypoint_latitude"
+                    app:layout_constraintEnd_toStartOf="@id/tv_waypoint_altitude"
+                    app:layout_constraintTop_toBottomOf="@id/tv_waypoint_tag"
+                    android:textColor="@android:color/black"
+                    android:text="0.0"
+                    android:textSize="14sp"/>
+
+            <TextView
+                    android:id="@+id/tv_waypoint_altitude"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintWidth_percent="0.33"
+                    app:layout_constraintStart_toEndOf="@id/tv_waypoint_longitude"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_waypoint_tag"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
+                    android:textColor="@android:color/black"
+                    android:text="0.0"
+                    android:textSize="14sp"/>
+
+        </android.support.constraint.ConstraintLayout>
+
         <ImageView
                 android:id="@+id/iv_battery"
                 android:layout_width="0dp"

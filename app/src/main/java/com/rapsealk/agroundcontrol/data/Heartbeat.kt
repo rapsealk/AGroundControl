@@ -4,6 +4,7 @@ data class Heartbeat(
     val timestamp: Double,
     val hostname: String,
     val leader: Boolean,
+    val mission_completed: Boolean,
     val global_position: GlobalPosition,
     val velocity: Velocity
 )
