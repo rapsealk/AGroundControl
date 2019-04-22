@@ -2,12 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.rapsealk.agroundcontrol">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <!--uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.VIBRATE"/-->
 
     <application
             android:allowBackup="true"
@@ -16,21 +16,22 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-
-        <meta-data
-                android:name="com.google.android.geo.API_KEY"
-                android:value="@string/google_maps_api"/>
-
-        <activity android:name=".MainActivity">
+        <activity android:name=".SocketActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".MissionActivity"/>
+
+        <!--meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="@string/google_maps_api"/>
+
+        <activity android:name=".MainActivity"/>
+        <activity android:name=".MissionActivity"/-->
         <!-- paho.mqtt -->
-        <service android:name="org.eclipse.paho.android.service.MqttService"/>
+        <!--service android:name="org.eclipse.paho.android.service.MqttService"/-->
     </application>
 
 </manifest>
