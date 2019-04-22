@@ -7,16 +7,11 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
-import android.os.Build
+import android.os.*
 import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.support.constraint.ConstraintLayout
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -32,7 +27,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
-import com.rapsealk.agroundcontrol.data.LogMessage
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
@@ -48,13 +42,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private val droneIdList = arrayListOf("")
     private lateinit var droneIdSpinnerAdapter: ArrayAdapter<String>
 
-    private lateinit var mqttUtil: MqttUtil
+    //private lateinit var mqttUtil: MqttUtil
 
     private lateinit var mGoogleMap: GoogleMap
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val droneMarkers = HashMap<String, Marker>()
 
-    private val mLogs = ArrayList<LogMessage>()
+    //private val mLogs = ArrayList<LogMessage>()
+
+    private lateinit var mSocket: ClientSocket
+    private val mHandler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,14 +63,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         drone_id_spinner.onItemSelectedListener = this
 
         //MqttUtil.updateDroneId(this)
+        mSocket = ClientSocket(this, mHandler)
+        mSocket.isDaemon = true
+        mSocket.start()
 
-        mqttUtil = MqttUtil(this)
-        val mqttClient = mqttUtil.getClient()
+        //mqttUtil = MqttUtil(this)
+        //val mqttClient = mqttUtil.getClient()
 
+        /*
         log_recycler_view.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = LogAdapter(mLogs)
         }
+        */
 
         cb_leader.setOnCheckedChangeListener(this)
         btn_home.setOnClickListener(this)
@@ -87,6 +89,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         btn_start.setOnClickListener(this)
 
         checkPermission()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mSocket.interrupt()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -159,6 +166,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     override fun onClick(view: View) {
         when (view.id) {
+            R.id.btn_arm    -> { mSocket.queueMessage("{ \"type\": \"command\", \"command\": \"arm\" }") }
+            R.id.btn_disarm -> { mSocket.queueMessage("{ \"type\": \"command\", \"command\": \"disarm\" }") }
+        }
+        /*
+        when (view.id) {
             R.id.btn_home       -> {
                 droneMarkers[mqttUtil.droneId]?.position?.let {
                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it))
@@ -175,6 +187,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                 // TODO: Draw missions
             }
         }
+        */
     }
     // View.OnClickListener
 
@@ -184,7 +197,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     override fun onCheckedChanged(button: CompoundButton, checked: Boolean) {
         Log.d(TAG, "button.isChecked: ${button.isChecked}")
         Log.d(TAG, "isChecked: $checked")
-        mqttUtil.assignLeader(mqttUtil.droneId, button.isChecked)
+        //mqttUtil.assignLeader(mqttUtil.droneId, button.isChecked)
     }
     // CompoundButton.OnCheckedChangeListener
 
@@ -193,7 +206,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         Log.d(TAG, "onItemSelected(parent: $parent, view: $view, position: $position, id: $id)")
-        mqttUtil.droneId = parent?.adapter?.getItem(position) as String
+        //mqttUtil.droneId = parent?.adapter?.getItem(position) as String
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -237,7 +250,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     mission?.forEach { Log.d(TAG, "mission: ${it.latitude}, ${it.longitude}")}
                     // TODO: Publish mqtt
                     val msgstr = "{ \"waypoints\": [" + mission?.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }?.joinToString(",") + "] }"
-                    mqttUtil.publishMessage("mission_upload/$droneId", msgstr)
+                    //mqttUtil.publishMessage("mission_upload/$droneId", msgstr)
                 }
             }
         }
@@ -299,8 +312,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         }))
     }
 
+    /*
     fun notifyLog(message: LogMessage) {
         mLogs.add(message)
         log_recycler_view.adapter?.notifyDataSetChanged()
     }
+    */
 }

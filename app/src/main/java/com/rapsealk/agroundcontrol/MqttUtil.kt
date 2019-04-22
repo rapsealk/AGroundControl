@@ -41,7 +41,7 @@ class MqttUtil(private val context: Context) : MqttCallback {
     fun getClient(): MqttAndroidClient {
         if (client == null) {
             val clientId = MqttClient.generateClientId()
-            val hostname = context.resources.getString(R.string.mqtt_url)
+            val hostname = ""//context.resources.getString(R.string.mqtt_url)
             val mqttUrl = "tcp://$hostname:1883"
             client = MqttAndroidClient(context, mqttUrl, clientId)
             client?.setCallback(this)
@@ -202,6 +202,6 @@ class MqttUtil(private val context: Context) : MqttCallback {
     }
 
     private fun notifyLog(message: LogMessage) {
-        (context as MainActivity).notifyLog(message)
+        //(context as MainActivity).notifyLog(message)
     }
 }
