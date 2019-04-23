@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private lateinit var mSocket: ClientSocket
     private val mHandler = Handler()
 
+    public var droneHostname: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -64,8 +66,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
         //MqttUtil.updateDroneId(this)
         mSocket = ClientSocket(this, mHandler)
-        mSocket.isDaemon = true
-        mSocket.start()
+        //mSocket.isDaemon = true
+        //mSocket.start()
+        val thread = Thread(mSocket)
+        thread.isDaemon = true
+        thread.start()
 
         //mqttUtil = MqttUtil(this)
         //val mqttClient = mqttUtil.getClient()
@@ -138,18 +143,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             val markerOptions = MarkerOptions()
                 .position(LatLng(it.latitude, it.longitude))
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-                //.icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_drone))
             val marker = mGoogleMap.addMarker(markerOptions)
             marker.tag = "Drone ID #01"
             droneMarkers[marker.tag as String] = marker
-            /*
-            Thread {
-                while (true) {
-                    marker.rotation = (Math.random().toFloat() * 1000) % 360
-                    Thread.sleep(3000)
-                }
-            }.start()
-            */
         }.addOnFailureListener {
             Toast.makeText(this@MainActivity, "Failed to get last location..", Toast.LENGTH_LONG).show()
             it.printStackTrace()
@@ -166,28 +162,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.btn_arm    -> { mSocket.queueMessage("{ \"type\": \"command\", \"command\": \"arm\" }") }
-            R.id.btn_disarm -> { mSocket.queueMessage("{ \"type\": \"command\", \"command\": \"disarm\" }") }
+            R.id.btn_arm    -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"arm\" }") }
+            R.id.btn_disarm -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"disarm\" }") }
+            R.id.btn_takeoff -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"takeoff\" }") }
+            R.id.btn_land -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"land\" }") }
+            R.id.btn_start -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"all\", \"command\": \"flocking_flight\" }")}
         }
-        /*
-        when (view.id) {
-            R.id.btn_home       -> {
-                droneMarkers[mqttUtil.droneId]?.position?.let {
-                    mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it))
-                }
-            }
-            R.id.btn_log        -> { log_layout.visibility = ConstraintLayout.VISIBLE }
-            R.id.btn_ok         -> { log_layout.visibility = ConstraintLayout.GONE }
-            R.id.btn_arm        -> { mqttUtil.arm(mqttUtil.droneId) }
-            R.id.btn_disarm     -> { mqttUtil.disarm(mqttUtil.droneId) }
-            R.id.btn_takeoff    -> { mqttUtil.takeoff(mqttUtil.droneId) }
-            R.id.btn_land       -> { mqttUtil.land(mqttUtil.droneId) }
-            R.id.btn_start      -> {
-                mqttUtil.start(droneIdList)
-                // TODO: Draw missions
-            }
-        }
-        */
     }
     // View.OnClickListener
 
@@ -197,7 +177,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     override fun onCheckedChanged(button: CompoundButton, checked: Boolean) {
         Log.d(TAG, "button.isChecked: ${button.isChecked}")
         Log.d(TAG, "isChecked: $checked")
-        //mqttUtil.assignLeader(mqttUtil.droneId, button.isChecked)
+        mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"assign_leader\", \"leader\": ${button.isChecked}")
     }
     // CompoundButton.OnCheckedChangeListener
 
@@ -206,7 +186,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
      */
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         Log.d(TAG, "onItemSelected(parent: $parent, view: $view, position: $position, id: $id)")
-        //mqttUtil.droneId = parent?.adapter?.getItem(position) as String
+        droneHostname = parent?.adapter?.getItem(position) as String
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {

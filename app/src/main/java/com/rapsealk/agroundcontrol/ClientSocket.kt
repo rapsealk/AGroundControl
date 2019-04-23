@@ -2,6 +2,7 @@ package com.rapsealk.agroundcontrol
 
 import android.content.Context
 import android.os.Handler
+import android.util.Log
 import android.widget.Toast
 import com.google.gson.Gson
 import com.rapsealk.agroundcontrol.data.BasicMessage
@@ -13,7 +14,7 @@ import java.net.Socket
 class ClientSocket(private val context: Context,
                    private val handler: Handler,
                    private val hostname: String = "106.10.36.61",
-                   private val port: Int        = 8080) : Thread() {
+                   private val port: Int        = 8080) : Runnable {
 
     private lateinit var mSocket: Socket
     private lateinit var mSocketReader: BufferedReader
@@ -26,7 +27,7 @@ class ClientSocket(private val context: Context,
     private lateinit var mReceiverThread: Thread
     private lateinit var mPublisherThread: Thread
 
-    override fun start() {
+    override fun run() {
         try {
             mSocket = Socket(hostname, port)
             mSocketReader = BufferedReader(InputStreamReader(mSocket.getInputStream()))
@@ -37,30 +38,33 @@ class ClientSocket(private val context: Context,
 
         val out = PrintWriter(mSocketWriter, true)
 
-        val localHostname = mSocket.localAddress.hostAddress
+        //val localHostname = mSocket.localAddress.hostAddress
         mHeartbeatThread = Thread {
             while (!Thread.currentThread().isInterrupted) {
-                out.println("{ \"type\": \"heartbeat\", \"id\": \"$localHostname\", \"timestamp\": ${System.currentTimeMillis().toFloat() / 1000} }")
+                out.println("{ \"type\": \"heartbeat\", \"hostname\": \"android\", \"timestamp\": ${System.currentTimeMillis().toFloat() / 1000} }")
                 Thread.sleep(1000)
             }
         }
         mHeartbeatThread.isDaemon = true
         mHeartbeatThread.start()
 
-        val buff = CharArray(1024)
         mReceiverThread = Thread {
             while (!Thread.currentThread().isInterrupted) {
-                // FIXME: readLine()
-                if (mSocketReader.read(buff, 0, 1024) > 0) {
-                    val received = String(buff)
-                    val message = mGson.fromJson(received, BasicMessage::class.java)
+                val receivedMessage = mSocketReader.readLine()
+                if (receivedMessage != null) {
+                    Log.d("ClientSocket", "received: $receivedMessage")
+                    val message = mGson.fromJson(receivedMessage, BasicMessage::class.java)
                     when (message.type) {
                         "heartbeat" -> {
-                            val heartbeat = mGson.fromJson(received, Heartbeat::class.java)
+                            val heartbeat = mGson.fromJson(receivedMessage, Heartbeat::class.java)
+                            handler.post {
+                                (context as MainActivity).notifyHeartbeat(heartbeat)
+                            }
                         }
+                        "command" -> { /* DO NOTHING */ }
                     }
                     handler.post {
-                        (context as MainActivity).tv_status_message.text = received
+                        (context as MainActivity).tv_status_message.text = receivedMessage
                     }
                 }
                 Thread.sleep(100)
@@ -71,7 +75,10 @@ class ClientSocket(private val context: Context,
 
         mPublisherThread = Thread {
             while (!Thread.currentThread().isInterrupted) {
-                mQueue.getOrNull(0)?.let { out.println(it) }
+                mQueue.getOrNull(0)?.let {
+                    mQueue.remove(it)
+                    out.println(it)
+                }
                 Thread.sleep(100)
             }
         }
@@ -88,8 +95,7 @@ class ClientSocket(private val context: Context,
         }
     }
 
-    override fun interrupt() {
-        super.interrupt()
+    fun interrupt() {
         mPublisherThread.interrupt()
         mReceiverThread.interrupt()
         mHeartbeatThread.interrupt()
