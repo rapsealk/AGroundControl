@@ -325,6 +325,15 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:context="com.rapsealk.agroundcontrol.MainActivity"/>
 
+        <android.support.v7.widget.AppCompatImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:layout_constraintStart_toStartOf="@id/map"
+                app:layout_constraintEnd_toEndOf="@id/map"
+                app:layout_constraintTop_toTopOf="@id/map"
+                app:layout_constraintBottom_toBottomOf="@id/map"
+                android:src="@drawable/target"/>
+
         <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_home"
                 android:layout_width="wrap_content"
@@ -336,13 +345,33 @@
                 android:textStyle="bold"/>
 
         <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_log"
+                android:id="@+id/btn_reset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/map"
+                app:layout_constraintTop_toTopOf="@id/map"
+                android:background="@android:color/transparent"
+                android:text="Reset"
+                android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_mark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@id/map"
+                app:layout_constraintTop_toTopOf="@id/map"
+                android:background="@android:color/transparent"
+                android:text="Mark"
+                android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_upload"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="@id/map"
                 app:layout_constraintBottom_toBottomOf="@id/map"
                 android:background="@android:color/transparent"
-                android:text="LOG"
+                android:text="Upload"
                 android:textStyle="bold"/>
 
     </android.support.constraint.ConstraintLayout>

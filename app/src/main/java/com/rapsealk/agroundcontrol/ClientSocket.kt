@@ -41,7 +41,8 @@ class ClientSocket(private val context: Context,
         //val localHostname = mSocket.localAddress.hostAddress
         mHeartbeatThread = Thread {
             while (!Thread.currentThread().isInterrupted) {
-                out.println("{ \"type\": \"heartbeat\", \"hostname\": \"android\", \"timestamp\": ${System.currentTimeMillis().toFloat() / 1000} }")
+                val timestamp = System.currentTimeMillis().toFloat() / 1000
+                out.println("{ \"type\": \"heartbeat\", \"hostname\": \"android\", \"timestamp\": $timestamp }")
                 Thread.sleep(1000)
             }
         }

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.*
 import android.support.v7.app.AppCompatActivity
@@ -30,7 +31,8 @@ import com.rapsealk.agroundcontrol.data.Heartbeat
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,
-    CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener, OnMapReadyCallback {
+    CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener,
+    OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
 
     private val TAG = MainActivity::class.java.simpleName
 
@@ -54,6 +56,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
     private val mHandler = Handler()
 
     public var droneHostname: String = ""
+
+    private var mCenter = LatLng(0.0, 0.0)
+    private val mMarkers = ArrayList<Marker>()
+    private var mPolyline: Polyline? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +90,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
 
         cb_leader.setOnCheckedChangeListener(this)
         btn_home.setOnClickListener(this)
-        btn_log.setOnClickListener(this)
+        btn_mark.setOnClickListener(this)
+        btn_reset.setOnClickListener(this)
+        btn_upload.setOnClickListener(this)
         btn_ok.setOnClickListener(this)
 
         btn_arm.setOnClickListener(this)
@@ -96,8 +104,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
         checkPermission()
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "ONPAUSE")
+        mSocket.interrupt()
+    }
+
     override fun onStop() {
         super.onStop()
+        Log.d(TAG, "ONSTOP")
         mSocket.interrupt()
     }
 
@@ -167,6 +182,31 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             R.id.btn_takeoff -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"takeoff\" }") }
             R.id.btn_land -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"land\" }") }
             R.id.btn_start -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"all\", \"command\": \"flocking_flight\" }")}
+            R.id.btn_home -> { droneMarkers[droneHostname]?.position?.let { mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) } }
+
+            R.id.btn_mark -> {
+                Log.d(TAG, "Mark at (${mCenter.latitude}, ${mCenter.longitude})")
+                val markerOptions = MarkerOptions().position(mCenter)
+                val marker = mGoogleMap.addMarker(markerOptions)
+                mMarkers.add(marker)
+
+                mPolyline?.remove()
+                mPolyline = mGoogleMap.addPolyline(PolylineOptions()
+                    .addAll(mMarkers.map { it.position })
+                    .width(10f)
+                    .color(Color.GREEN))
+            }
+            R.id.btn_reset -> {
+                mMarkers.clear()
+                mPolyline?.remove()
+                mPolyline = null
+            }
+            R.id.btn_upload -> {
+                val mission = mMarkers.map { it.position }
+                mission.forEach { Log.d(TAG, "mission: ${it.latitude}, ${it.longitude}")}
+                val msgstr = "[" + mission.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }.joinToString(",") + "]"
+                mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"mission_upload\", \"waypoints\": $msgstr }")
+            }
         }
     }
     // View.OnClickListener
@@ -213,12 +253,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.red_zerg), size, size, true)
             droneMarkers.values.forEach { it.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap)) }
         }
+        map.setOnCameraIdleListener(this)
 
         mGoogleMap = map
 
         init()
     }
     // OnMapReadyCallback
+
+    /**
+     * GoogleMap.OnCameraIdleListener
+     */
+    override fun onCameraIdle() {
+        mCenter = mGoogleMap.projection.visibleRegion.latLngBounds.center
+    }
+    // GoogleMap.OnCameraIdleListener
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -229,7 +278,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
                     val mission = data?.extras?.getParcelableArray("mission")?.map { it as LatLng }
                     mission?.forEach { Log.d(TAG, "mission: ${it.latitude}, ${it.longitude}")}
                     // TODO: Publish mqtt
-                    val msgstr = "{ \"waypoints\": [" + mission?.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }?.joinToString(",") + "] }"
+                    val msgstr = "[" + mission?.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }?.joinToString(",") + "]"
+                    mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"mission_upload\", \"waypoints\": $msgstr }")
                     //mqttUtil.publishMessage("mission_upload/$droneId", msgstr)
                 }
             }
