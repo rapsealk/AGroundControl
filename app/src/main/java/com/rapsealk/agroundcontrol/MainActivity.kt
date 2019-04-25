@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,
             R.id.btn_disarm -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"disarm\" }") }
             R.id.btn_takeoff -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"takeoff\" }") }
             R.id.btn_land -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"land\" }") }
-            R.id.btn_start -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"all\", \"command\": \"flocking_flight\" }")}
+            R.id.btn_start -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"flocking_flight\" }")}
             R.id.btn_home -> { droneMarkers[droneHostname]?.position?.let { mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) } }
 
             R.id.btn_mark -> {
