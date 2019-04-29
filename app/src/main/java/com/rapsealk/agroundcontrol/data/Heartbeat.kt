@@ -6,7 +6,10 @@ data class Heartbeat(
     val leader: Boolean                     = false,
     val mission_completed: Boolean          = false,
     val global_position: GlobalPosition     = GlobalPosition(),
-    val velocity: Velocity                  = Velocity()
+    val velocity: Velocity                  = Velocity(),
+    //val waypoints: Array<GlobalPosition>    = Array<GlobalPosition>(),
+    val wp_idx: Int                         = 0,
+    val mode: String                        = "disarm"
 )
 
 data class GlobalPosition(

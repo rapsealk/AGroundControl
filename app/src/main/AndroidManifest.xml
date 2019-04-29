@@ -30,8 +30,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".MissionActivity"/>
-        <!-- paho.mqtt -->
-        <!--service android:name="org.eclipse.paho.android.service.MqttService"/-->
     </application>
 
 </manifest>

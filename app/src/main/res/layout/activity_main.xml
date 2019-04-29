@@ -33,6 +33,25 @@
                     android:textSize="21sp"
                     android:textStyle="bold"/>
 
+            <!-- CheckedTextView -->
+            <TextView
+                    android:id="@+id/tv_leader_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toStartOf="@id/drone_id_spinner"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginEnd="16dp"
+                    android:textColor="@android:color/black"
+                    android:text="leader"/>
+
+            <android.support.v7.widget.AppCompatCheckBox
+                    android:id="@+id/cb_leader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="@id/tv_leader_tag"
+                    app:layout_constraintEnd_toEndOf="@id/tv_leader_tag"
+                    app:layout_constraintTop_toBottomOf="@id/tv_leader_tag"/>
+
             <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/drone_id_spinner"
                     android:layout_width="128dp"
@@ -69,24 +88,6 @@
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:background="@drawable/gradation">
-
-        <!-- CheckedTextView -->
-        <TextView
-                android:id="@+id/tv_leader_tag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_status_message"
-                android:textColor="@android:color/black"
-                android:text="leader"/>
-
-        <android.support.v7.widget.AppCompatCheckBox
-                android:id="@+id/cb_leader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="@id/tv_leader_tag"
-                app:layout_constraintEnd_toEndOf="@id/tv_leader_tag"
-                app:layout_constraintTop_toBottomOf="@id/tv_leader_tag"/>
 
         <android.support.constraint.ConstraintLayout
                 android:id="@+id/global_position_layout"
@@ -388,7 +389,7 @@
                 android:id="@+id/btn_pairs_layout"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                app:layout_constraintWidth_percent="0.8"
+                app:layout_constraintWidth_percent="0.6"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
@@ -439,11 +440,21 @@
 
         </android.support.constraint.ConstraintLayout>
 
+        <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/flight_mode_spinner"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintHeight_percent="0.5"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btn_pairs_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                style="@style/Base.Widget.AppCompat.Spinner.Underlined"/>
+
         <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_start"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintHeight_percent="0.5"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/btn_pairs_layout"
                 app:layout_constraintEnd_toEndOf="parent"
