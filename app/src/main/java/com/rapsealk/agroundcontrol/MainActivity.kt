@@ -229,6 +229,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         }
         map.setOnCameraIdleListener(this)
 
+        val safeArea = listOf(LatLng(37.599204, 126.863546), LatLng(37.599329, 126.863084),
+                                LatLng(37.599493, 126.863179), LatLng(37.599329, 126.863616))
+        val polygonOption = PolygonOptions()
+            .addAll(safeArea)
+            .fillColor(Color.GREEN)
+            .strokeColor(Color.CYAN)
+        map.addPolygon(polygonOption)
+
         mGoogleMap = map
 
         init()
