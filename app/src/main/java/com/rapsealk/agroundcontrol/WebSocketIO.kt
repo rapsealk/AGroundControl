@@ -18,17 +18,18 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
     }
 
     private val mGson = Gson()
-    private val mQueue = LinkedList<String>()
+    private val mQueue = LinkedList<Pair<String, String>>()
 
-    private val mSocket: Socket = IO.socket("http://$hostname") // :3000
+    private val mSocket: Socket = IO.socket("http://$hostname:3000")
 
     private val onConnect = Emitter.Listener {
-        // TODO
-        mSocket.emit("connection", "{}")
+        // publish("connection", "{}")
+        Log.d(TAG, "socket is connected to $hostname..")
     }
 
     private val onDisconnect = Emitter.Listener {
-        // TODO
+        // publish("disconnect", "{}")
+        Log.d(TAG, "socket is disconnected from $hostname..")
     }
 
     private val onHeartbeat = Emitter.Listener {
@@ -41,6 +42,9 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
         }
     }
 
+    private var mOutQueueThread: Thread? = null
+    private var mHeartbeatThread: Thread? = null
+
     init {
         mSocket.on(Socket.EVENT_CONNECT, onConnect)
             .on(Socket.EVENT_DISCONNECT, onDisconnect)
@@ -49,9 +53,19 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
 
     fun connect() {
         mSocket.connect()
+
+        mOutQueueThread = Thread(OutMessageQueue())
+        mOutQueueThread?.start()
+        Log.d(TAG, "OutQueueThread is alive: ${mOutQueueThread?.isAlive}")
+        mHeartbeatThread = Thread(Heartbeater())
+        mHeartbeatThread?.start()
+        Log.d(TAG, "HeartbeatThread is alive: ${mHeartbeatThread?.isAlive}")
     }
 
     fun disconnect() {
+        mOutQueueThread?.interrupt()
+        mHeartbeatThread?.interrupt()
+
         mSocket.disconnect()
 
         mSocket.off(Socket.EVENT_CONNECT, onConnect)
@@ -59,21 +73,37 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
             .off(EVENT_HEARTBEAT, onHeartbeat)
     }
 
-    fun queueing() {
-        while (Thread.interrupted().not()) {
-            if (mQueue.peek() != null) {
-                val message = mQueue.poll()
-                mSocket.emit()
-            }
-            Thread.sleep(100)
-        }
-    }
-
-    fun heartbeat() {
-
+    fun queue(topic: String, message: String) {
+        mQueue.offer(Pair(topic, message))   // add
     }
 
     fun publish(event: String, message: String) {
         mSocket.emit(event, message)
+    }
+
+    /**
+     * RunnableImpl
+     */
+    inner class Heartbeater : Runnable {
+        override fun run() {
+            while (!Thread.interrupted()) {
+                val timestamp = System.currentTimeMillis().toFloat() / 1000
+                val message = "{ \"type\": \"heartbeat\", \"hostname\": \"android\", \"timestamp\": $timestamp }"
+                queue(EVENT_HEARTBEAT, message)
+                Thread.sleep(1000)
+            }
+        }
+    }
+
+    inner class OutMessageQueue : Runnable {
+        override fun run() {
+            while (Thread.interrupted().not()) {
+                if (mQueue.peek() != null) {
+                    val message = mQueue.poll()
+                    publish(message.first, message.second)
+                }
+                Thread.sleep(100)
+            }
+        }
     }
 }

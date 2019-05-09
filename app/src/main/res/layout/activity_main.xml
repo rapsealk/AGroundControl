@@ -383,7 +383,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintHeight_percent="0.175"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/colorAccentLight">
 
         <android.support.constraint.ConstraintLayout
                 android:id="@+id/btn_pairs_layout"

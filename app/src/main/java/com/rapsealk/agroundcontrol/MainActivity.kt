@@ -157,6 +157,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
      */
     override fun onClick(view: View) {
         when (view.id) {
+            /*
             R.id.cb_leader -> {
                 val button = view as CheckBox
                 Log.d(TAG, "checked: ${button.isChecked}")
@@ -198,6 +199,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
                 val msgstr = "[" + mission.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }.joinToString(",") + "]"
                 mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"mission_upload\", \"waypoints\": $msgstr }")
             }
+            */
         }
     }
     // View.OnClickListener
