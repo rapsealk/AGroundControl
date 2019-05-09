@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val droneMarkers = HashMap<String, Marker>()
 
-    private lateinit var mSocket: ClientSocket
+    private lateinit var mSocket: WebSocketIO
     private val mHandler = Handler()
 
     private var droneHostname: String = ""
@@ -67,10 +67,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         flightModeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         flight_mode_spinner.adapter = flightModeSpinnerAdapter
 
-        mSocket = ClientSocket(this, mHandler)
+        mSocket = WebSocketIO()
+        mSocket.connect()
+        /*
         val thread = Thread(mSocket)
         thread.isDaemon = true
         thread.start()
+        */
 
         cb_leader.setOnClickListener(this)
         btn_home.setOnClickListener(this)
@@ -88,16 +91,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         checkPermission()
     }
 
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "ONPAUSE")
-        mSocket.interrupt()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "ONSTOP")
-        mSocket.interrupt()
+    override fun onDestroy() {
+        super.onDestroy()
+        mSocket.disconnect()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -165,6 +161,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
                 val button = view as CheckBox
                 Log.d(TAG, "checked: ${button.isChecked}")
                 mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"assign_leader\", \"leader\": ${button.isChecked} }")
+
             }
             R.id.btn_arm    -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"arm\" }") }
             R.id.btn_disarm -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"disarm\" }") }
