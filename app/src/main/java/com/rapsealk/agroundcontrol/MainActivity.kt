@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.*
 import com.rapsealk.agroundcontrol.data.GlobalPosition
 import com.rapsealk.agroundcontrol.data.Heartbeat
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnItemSelectedListener,
     OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
@@ -46,7 +47,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private val droneMarkers = HashMap<String, Marker>()
 
     private lateinit var mSocket: WebSocketIO
-    private val mHandler = Handler()
 
     private var droneHostname: String = ""
 
@@ -68,7 +68,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         flight_mode_spinner.adapter = flightModeSpinnerAdapter
 
         mSocket = WebSocketIO()
-        mSocket.connect()
+        try {
+            mSocket.connect()
+        } catch (exception: Exception) {
+            Snackbar.make(root_view, "socket.io 연결에 실패했습니다.", Snackbar.LENGTH_INDEFINITE).show()
+            Log.d(TAG, "socket.io 연결에 실패했습니다.")
+            exception.printStackTrace()
+        }
         /*
         val thread = Thread(mSocket)
         thread.isDaemon = true
@@ -157,21 +163,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
      */
     override fun onClick(view: View) {
         when (view.id) {
-            /*
             R.id.cb_leader -> {
                 val button = view as CheckBox
                 Log.d(TAG, "checked: ${button.isChecked}")
-                mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"assign_leader\", \"leader\": ${button.isChecked} }")
+                mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"assign_leader\", \"leader\": ${button.isChecked} }")
 
             }
-            R.id.btn_arm    -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"arm\" }") }
-            R.id.btn_disarm -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"disarm\" }") }
-            R.id.btn_takeoff -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"takeoff\" }") }
-            R.id.btn_land -> { mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"land\" }") }
+            R.id.btn_arm    -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"arm\" }") }
+            R.id.btn_disarm -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"disarm\" }") }
+            R.id.btn_takeoff -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"takeoff\" }") }
+            R.id.btn_land -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"land\" }") }
             R.id.btn_start -> {
                 val flightMode = flight_mode_spinner.selectedItem as String
                 Log.d(TAG, "flightMode: $flightMode")
-                mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"$flightMode\" }")
+                mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"$flightMode\" }")
             }
             R.id.btn_home -> { droneMarkers[droneHostname]?.position?.let { mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) } }
 
@@ -197,9 +202,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
                 val mission = mMarkers.map { it.position }
                 mission.forEach { Log.d(TAG, "mission: ${it.latitude}, ${it.longitude}")}
                 val msgstr = "[" + mission.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }.joinToString(",") + "]"
-                mSocket.queueMessage("{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"mission_upload\", \"waypoints\": $msgstr }")
+                mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"mission_upload\", \"waypoints\": $msgstr }")
             }
-            */
         }
     }
     // View.OnClickListener
@@ -228,13 +232,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         }
         map.setOnCameraIdleListener(this)
 
-        val safeArea = listOf(LatLng(37.599204, 126.863546), LatLng(37.599329, 126.863084),
-                                LatLng(37.599493, 126.863179), LatLng(37.599329, 126.863616))
+        val safeArea = listOf(
+            LatLng(37.599227, 126.863522),
+            LatLng(37.599356, 126.863067),
+            LatLng(37.599523, 126.863155),
+            LatLng(37.599394, 126.863610)
+        )
         val polygonOption = PolygonOptions()
             .addAll(safeArea)
             .fillColor(Color.GREEN)
-            .strokeColor(Color.CYAN)
+            .strokeColor(Color.BLUE)
         map.addPolygon(polygonOption)
+
+        // map.mapType = GoogleMap.MAP_TYPE_SATELLITE
 
         mGoogleMap = map
 

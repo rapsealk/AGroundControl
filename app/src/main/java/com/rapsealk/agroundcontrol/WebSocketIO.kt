@@ -8,6 +8,7 @@ import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.Exception
 import java.util.*
 
 class WebSocketIO(hostname: String = "106.10.36.61") {
@@ -15,6 +16,12 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
     companion object {
         private val TAG = WebSocketIO::class.java.simpleName
         private const val EVENT_HEARTBEAT = "heartbeat"
+
+        const val EVENT_COMMAND = "command"
+        const val EVENT_ARM     = "arm"
+        const val EVENT_DISARM  = "disarm"
+        const val EVENT_TAKEOFF = "takeoff"
+        const val EVENT_LAND    = "land"
     }
 
     private val mGson = Gson()
@@ -52,7 +59,11 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
     }
 
     fun connect() {
-        mSocket.connect()
+        try {
+            mSocket.connect()
+        } catch (exception: Exception) {
+            throw exception
+        }
 
         mOutQueueThread = Thread(OutMessageQueue())
         mOutQueueThread?.start()
