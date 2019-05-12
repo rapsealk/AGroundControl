@@ -1,9 +1,10 @@
 package com.rapsealk.agroundcontrol.data
 
-data class Message(
-    val hostname: String,
-    val message: String
-)
+abstract class Message {
+    abstract val type: String
+    abstract val hostname: String
+    abstract val timestamp: Double
+}
 
 data class LogMessage(
     val hostname: String,

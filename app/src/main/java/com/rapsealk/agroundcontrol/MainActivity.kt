@@ -22,8 +22,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.rapsealk.agroundcontrol.data.GlobalPosition
-import com.rapsealk.agroundcontrol.data.Heartbeat
+import com.rapsealk.agroundcontrol.data.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.Exception
 
@@ -46,7 +45,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val droneMarkers = HashMap<String, Marker>()
 
-    private lateinit var mSocket: WebSocketIO
+    private lateinit var mSocket: Socketeer
 
     private var droneHostname: String = ""
 
@@ -67,7 +66,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         flightModeSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         flight_mode_spinner.adapter = flightModeSpinnerAdapter
 
-        mSocket = WebSocketIO()
+        mSocket = Socketeer(this)
         try {
             mSocket.connect()
         } catch (exception: Exception) {
@@ -166,17 +165,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             R.id.cb_leader -> {
                 val button = view as CheckBox
                 Log.d(TAG, "checked: ${button.isChecked}")
-                mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"assign_leader\", \"leader\": ${button.isChecked} }")
-
+                mSocket.queue(Socketeer.EVENT_COMMAND, LeaderCommand(target = droneHostname, leader = button.isChecked))
             }
-            R.id.btn_arm    -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"arm\" }") }
-            R.id.btn_disarm -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"disarm\" }") }
-            R.id.btn_takeoff -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"takeoff\" }") }
-            R.id.btn_land -> { mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"land\" }") }
+            R.id.btn_arm    -> { mSocket.queue(Socketeer.EVENT_COMMAND,  Command(target = droneHostname, command = "arm")) }
+            R.id.btn_disarm -> { mSocket.queue(Socketeer.EVENT_COMMAND, Command(target = droneHostname, command = "disarm")) }
+            R.id.btn_takeoff -> { mSocket.queue(Socketeer.EVENT_COMMAND, Command(target = droneHostname, command = "takeoff")) }
+            R.id.btn_land -> { mSocket.queue(Socketeer.EVENT_COMMAND, Command(target = droneHostname, command = "land")) }
             R.id.btn_start -> {
                 val flightMode = flight_mode_spinner.selectedItem as String
                 Log.d(TAG, "flightMode: $flightMode")
-                mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"$flightMode\" }")
+                mSocket.queue(Socketeer.EVENT_COMMAND, Command(target = droneHostname, command = flightMode))
             }
             R.id.btn_home -> { droneMarkers[droneHostname]?.position?.let { mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) } }
 
@@ -199,10 +197,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
                 mPolyline = null
             }
             R.id.btn_upload -> {
-                val mission = mMarkers.map { it.position }
-                mission.forEach { Log.d(TAG, "mission: ${it.latitude}, ${it.longitude}")}
-                val msgstr = "[" + mission.map { "{ \"latitude\": ${it.latitude}, \"longitude\": ${it.longitude}, \"altitude\": 3 }" }.joinToString(",") + "]"
-                mSocket.queue(WebSocketIO.EVENT_COMMAND, "{ \"type\": \"command\", \"target\": \"$droneHostname\", \"command\": \"mission_upload\", \"waypoints\": $msgstr }")
+                val waypoints = mMarkers.map { GlobalPosition(it.position.latitude, it.position.longitude, 10.0) }
+                mSocket.queue(Socketeer.EVENT_COMMAND, WaypointCommand(target = droneHostname, waypoints = waypoints))
             }
         }
     }

@@ -1,20 +1,25 @@
 package com.rapsealk.agroundcontrol
 
+import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import com.rapsealk.agroundcontrol.data.Heartbeat
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.*
 
-class WebSocketIO(hostname: String = "106.10.36.61") {
+class Socketeer(private val context: Context,
+                hostname: String = "106.10.36.61") {
 
     companion object {
-        private val TAG = WebSocketIO::class.java.simpleName
+        private val TAG = Socketeer::class.java.simpleName
         private const val EVENT_HEARTBEAT = "heartbeat"
 
         const val EVENT_COMMAND = "command"
@@ -25,7 +30,7 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
     }
 
     private val mGson = Gson()
-    private val mQueue = LinkedList<Pair<String, String>>()
+    private val mQueue = LinkedList<Pair<String, Any>>()
 
     private val mSocket: Socket = IO.socket("http://$hostname:3000")
 
@@ -41,9 +46,12 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
 
     private val onHeartbeat = Emitter.Listener {
         val heartbeat = it.first() as JSONObject
+        Log.d(TAG, "Heartbeat: $heartbeat")
         try {
             val heartbeatMessage = mGson.fromJson(heartbeat.toString(), Heartbeat::class.java)
-            Log.d(TAG, "Heartbeat: $heartbeatMessage")
+            GlobalScope.launch(Dispatchers.Main) {
+                (context as MainActivity).notifyHeartbeat(heartbeatMessage)
+            }
         } catch (exception: JSONException) {
             exception.printStackTrace()
         }
@@ -84,11 +92,11 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
             .off(EVENT_HEARTBEAT, onHeartbeat)
     }
 
-    fun queue(topic: String, message: String) {
+    fun queue(topic: String, message: Any) {
         mQueue.offer(Pair(topic, message))   // add
     }
 
-    fun publish(event: String, message: String) {
+    fun publish(event: String, message: Any) {
         mSocket.emit(event, message)
     }
 
@@ -98,9 +106,7 @@ class WebSocketIO(hostname: String = "106.10.36.61") {
     inner class Heartbeater : Runnable {
         override fun run() {
             while (!Thread.interrupted()) {
-                val timestamp = System.currentTimeMillis().toFloat() / 1000
-                val message = "{ \"type\": \"heartbeat\", \"hostname\": \"android\", \"timestamp\": $timestamp }"
-                queue(EVENT_HEARTBEAT, message)
+                queue(EVENT_HEARTBEAT, Heartbeat())
                 Thread.sleep(1000)
             }
         }
