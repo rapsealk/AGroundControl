@@ -286,6 +286,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         notifyGlobalPosition(heartbeat.global_position)
     }
 
+    fun notifyTurnOff(hostname: String) {
+        if (droneIdList.contains(hostname)) {
+            droneIdSpinnerAdapter.remove(hostname)
+            droneIdSpinnerAdapter.notifyDataSetChanged()
+        }
+        droneMarkers.remove(hostname)?.remove()
+    }
+
     public fun notifyLeader(leader: Boolean) {
         cb_leader.isChecked = leader
     }

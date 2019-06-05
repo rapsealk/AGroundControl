@@ -1,5 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_background"/>
-    <foreground android:drawable="@drawable/ic_launcher_foreground"/>
-</adaptive-icon>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt"
+    android:viewportWidth="192"
+    android:viewportHeight="192"
+    android:width="240dp"
+    android:height="240dp">
+    <group
+        android:scaleX="0.1"
+        android:scaleY="-0.1"
+        android:translateY="192">
+        <path
+            android:pathData="M780 1841c-365 -81 -627 -328 -721 -681 -33 -123 -33 -339 0 -460 98 -363 371 -614 744 -685 403 -76 830 145 1003 520 66 142 79 210 78 400 0 155 -3 178 -27 258 -97 317 -343 554 -662 638 -116 30 -302 35 -415 10zm358 -17c152 -31 305 -110 420 -219 127 -119 209 -256 253 -420 28 -104 31 -306 6 -409 -81 -328 -296 -553 -622 -652 -80 -24 -106 -27 -235 -27 -128 0 -155 3 -231 26 -48 14 -112 37 -143 51 -195 86 -372 275 -445 476 -46 127 -55 181 -55 325 1 122 4 151 27 228 29 95 71 185 120 257 40 59 150 173 207 215 94 69 260 138 380 158 64 11 247 6 318 -9z"
+            android:fillColor="#000000" />
+    </group>
+</vector>

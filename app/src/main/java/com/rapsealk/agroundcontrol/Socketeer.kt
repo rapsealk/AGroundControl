@@ -12,15 +12,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.Exception
 import java.util.*
+import kotlin.Exception
 
 class Socketeer(private val context: Context,
-                hostname: String = "106.10.36.61") {
+                hostname: String = "52.231.158.105") {
 
     companion object {
         private val TAG = Socketeer::class.java.simpleName
         private const val EVENT_HEARTBEAT = "heartbeat"
+        private const val EVENT_TURN_OFF  = "turn_off"
 
         const val EVENT_COMMAND = "command"
         const val EVENT_ARM     = "arm"
@@ -57,6 +58,17 @@ class Socketeer(private val context: Context,
         }
     }
 
+    private val onTurnOff = Emitter.Listener {
+        val hostname = it.first() as String
+        try {
+            GlobalScope.launch(Dispatchers.Main) {
+                (context as MainActivity).notifyTurnOff(hostname)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+    }
+
     private var mOutQueueThread: Thread? = null
     private var mHeartbeatThread: Thread? = null
 
@@ -64,6 +76,7 @@ class Socketeer(private val context: Context,
         mSocket.on(Socket.EVENT_CONNECT, onConnect)
             .on(Socket.EVENT_DISCONNECT, onDisconnect)
             .on(EVENT_HEARTBEAT, onHeartbeat)
+            .on(EVENT_TURN_OFF, onTurnOff)
     }
 
     fun connect() {
