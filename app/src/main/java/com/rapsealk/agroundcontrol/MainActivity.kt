@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private lateinit var mGoogleMap: GoogleMap
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val droneMarkers = HashMap<String, Marker>()
+    private val droneHeadings = HashMap<Marker, Polyline>()
 
     private lateinit var mSocket: Socketeer
 
@@ -137,8 +138,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             tv_latitude.text = it.latitude.toString()
             tv_longitude.text = it.longitude.toString()
             tv_altitude.text = String.format("%.6f", it.altitude)
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 20f))
-            // FIXME: sample marker
+            val latlng = LatLng(it.latitude, it.longitude)
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 20f))
+            /* FIXME: sample marker
             val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.red_zerg), 128, 128, true)
             val markerOptions = MarkerOptions()
                 .position(LatLng(it.latitude, it.longitude))
@@ -146,6 +148,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             val marker = mGoogleMap.addMarker(markerOptions)
             marker.tag = "Drone ID #01"
             droneMarkers[marker.tag as String] = marker
+            */
+            val marker = testMarkerWithHeading(latlng)
         }.addOnFailureListener {
             Toast.makeText(this@MainActivity, "Failed to get last location..", Toast.LENGTH_LONG).show()
             it.printStackTrace()
@@ -322,5 +326,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             10f <= percentage -> { R.drawable.ic_battery_cell_0 }
             else -> { R.drawable.ic_battery_cell_0_red }
         }))
+    }
+
+    private fun testMarkerWithHeading(position: LatLng): Marker {
+        val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.red_zerg), 108, 108, true)
+        val markerOptions = MarkerOptions()
+            .position(position)
+            .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+            .anchor(0.5f, 0.5f)
+        val marker = mGoogleMap.addMarker(markerOptions)
+        val polylineOptions = PolylineOptions()
+            .add(position)
+            .add(LatLng(position.latitude + 0.00005, position.longitude + 0.0001))
+            .width(10f)
+            .color(Color.GREEN)
+        val polyline = mGoogleMap.addPolyline(polylineOptions)
+        droneHeadings[marker] = polyline
+        return marker
     }
 }
