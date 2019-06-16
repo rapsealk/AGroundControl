@@ -7,10 +7,17 @@ data class Heartbeat(
     val leader: Boolean                     = false,
     val mission_completed: Boolean          = false,
     val global_position: GlobalPosition     = GlobalPosition(),
-    val velocity: Velocity                  = Velocity(),
+    val velocity: Vector                    = Vector.EmptyVector,
     //val waypoints: Array<GlobalPosition>    = Array<GlobalPosition>(),
     val wp_idx: Int                         = 0,
-    val mode: String                        = "disarm"
+    val mode: String                        = "disarm",
+    // TODO
+    val collision_avoidance: Vector         = Vector.EmptyVector,
+    val velocity_matching: Vector           = Vector.EmptyVector,
+    val flocking_center: Vector             = Vector.EmptyVector,
+    val formation_control: Vector           = Vector.EmptyVector,
+    val steer: Vector                       = Vector.EmptyVector,
+    val target: Vector                      = Vector.EmptyVector
 ) : Message() {
     override fun toString(): String = "{" +
         "\"timestamp\": $timestamp," +
@@ -36,11 +43,18 @@ data class GlobalPosition(
     "}"
 }
 
-data class Velocity(
+data class Vector(
     val x: Double = 0.0,
     val y: Double = 0.0,
     val z: Double = 0.0
 ) {
+    companion object {
+        @JvmStatic
+        val EmptyVector = Vector()
+    }
+
+    fun isEmpty(): Boolean = (x == 0.0 && y == 0.0 && z == 0.0)
+
     override fun toString(): String = "{" +
         "\"x\": $x," +
         "\"y\": $y," +

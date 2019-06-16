@@ -16,7 +16,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:background="@color/colorPrimary">
+            android:background="@android:color/white">
 
         <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
@@ -63,7 +63,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     style="@style/Base.Widget.AppCompat.Spinner.Underlined"
-                    android:background="@color/colorPrimary"/>
+                    android:background="@android:color/darker_gray"/>
 
             <ImageView
                     android:layout_width="128dp"
@@ -354,6 +354,72 @@
                 android:background="@android:color/transparent"
                 android:text="Reset"
                 android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_collision_avoidance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_reset"
+                android:layout_marginStart="4dp"
+                android:text="- collision avoidance"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_red_dark"/>
+
+        <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_velocity_matching"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_collision_avoidance"
+                android:layout_marginStart="4dp"
+                android:text="- velocity matching"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_green_light"/>
+
+        <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_flocking_center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_velocity_matching"
+                android:layout_marginStart="4dp"
+                android:text="- flocking center"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_blue_light"/>
+
+        <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_formation_control"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_flocking_center"
+                android:layout_marginStart="4dp"
+                android:text="- formation control"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_purple"/>
+
+        <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_steer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_formation_control"
+                android:layout_marginStart="4dp"
+                android:text="- steer"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_orange_light"/>
+
+        <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_target"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_steer"
+                android:layout_marginStart="4dp"
+                android:text="- target"
+                android:textStyle="bold"
+                android:textColor="@color/livingCoral"/>
 
         <android.support.v7.widget.AppCompatButton
                 android:id="@+id/btn_mark"

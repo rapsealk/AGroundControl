@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -45,6 +46,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private val droneMarkers = HashMap<String, Marker>()
     private val droneHeadings = HashMap<Marker, Polyline>()
+    // ==============================================================
+    private val collisionAvoidance = HashMap<Marker, Polyline>()
+    private val velocityMatching = HashMap<Marker, Polyline>()
+    private val flockingCenter = HashMap<Marker, Polyline>()
+    private val formationControl = HashMap<Marker, Polyline>()
+    private val target = HashMap<Marker, Polyline>()
 
     private lateinit var mSocket: Socketeer
 
@@ -149,7 +156,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             marker.tag = "Drone ID #01"
             droneMarkers[marker.tag as String] = marker
             */
-            val marker = testMarkerWithHeading(latlng)
+            //val marker = testMarkerWithHeading(latlng)
         }.addOnFailureListener {
             Toast.makeText(this@MainActivity, "Failed to get last location..", Toast.LENGTH_LONG).show()
             it.printStackTrace()
@@ -262,6 +269,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
 
     public fun notifyHeartbeat(heartbeat: Heartbeat) {
         val droneId = heartbeat.hostname
+        val position = heartbeat.global_position
+
         if (!droneIdList.contains(droneId)) {
             droneIdSpinnerAdapter.add(droneId)
             droneIdSpinnerAdapter.notifyDataSetChanged()
@@ -274,20 +283,98 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             } else {
                 vibrator.vibrate(500)
             }
-            Toast.makeText(this@MainActivity, "new marker @ (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})", Toast.LENGTH_LONG).show()
-            Log.d(TAG, "new marker @ (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})")
+            Toast.makeText(this@MainActivity, "new marker @ (${position.latitude}, ${position.longitude})", Toast.LENGTH_LONG).show()
+            Log.d(TAG, "new marker @ (${position.latitude}, ${position.longitude})")
+            val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.red_zerg), 36, 36, true)
             val markerOptions = MarkerOptions()
-                .position(LatLng(heartbeat.global_position.latitude, heartbeat.global_position.longitude))
+                .position(LatLng(position.latitude, position.longitude))
                 .title("${heartbeat.hostname} (${heartbeat.leader})")
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                .anchor(0.5f, 0.5f)
             droneMarkers[droneId] = mGoogleMap.addMarker(markerOptions)
             droneMarkers[droneId]?.tag = droneId
         }
-        Log.d(TAG, "Update marker position to (${heartbeat.global_position.latitude}, ${heartbeat.global_position.longitude})")
-        droneMarkers[droneId]?.position = LatLng(heartbeat.global_position.latitude, heartbeat.global_position.longitude)
+        Log.d(TAG, "Update marker position to (${position.latitude}, ${position.longitude})")
+        droneMarkers[droneId]?.position = LatLng(position.latitude, position.longitude)
+        // ==========================================================
+        val marker = droneMarkers[droneId]!!
+        val latlng = LatLng(position.latitude, position.longitude)
+        /* # 1 Steering
+        val steer = heartbeat.steer
+        droneHeadings[marker]?.remove()
+        if (!steer.isEmpty()) {
+            val polylineOptions = PolylineOptions()
+                .add(latlng)
+                .add(LatLng(position.latitude + steer.x / 100, position.longitude + steer.y / 100))
+                .width(10f)
+                .color(ResourcesCompat.getColor(resources, android.R.color.holo_orange_light, null))
+            droneHeadings[marker] = mGoogleMap.addPolyline(polylineOptions)
+        }
+        */
+        // # 2 Collision Avoidance
+        val colavo = heartbeat.collision_avoidance
+        collisionAvoidance[marker]?.remove()
+        if (!colavo.isEmpty()) {
+            val collisionAvoidancePolylineOptions = PolylineOptions()
+                .add(latlng)
+                .add(LatLng(latlng.latitude + (colavo.x-latlng.latitude) * 3, latlng.longitude + (colavo.y-latlng.longitude) * 3))
+                .width(10f)
+                .color(ResourcesCompat.getColor(resources, android.R.color.holo_red_dark, null))
+            collisionAvoidance[marker] = mGoogleMap.addPolyline(collisionAvoidancePolylineOptions)
+        }
+        // # 3 Velocity Matching
+        val velmat = heartbeat.velocity_matching
+        velocityMatching[marker]?.remove()
+        if (!velmat.isEmpty()) {
+            val velocityMatchingPolylineOptions = PolylineOptions()
+                .add(latlng)
+                //.add(LatLng(velmat.x, velmat.y))
+                .add(LatLng(latlng.latitude + (velmat.x-latlng.latitude)*3, latlng.longitude+(velmat.y-latlng.longitude)*3))
+                .width(10f)
+                .color(ResourcesCompat.getColor(resources, android.R.color.holo_green_light, null))
+            velocityMatching[marker] = mGoogleMap.addPolyline(velocityMatchingPolylineOptions)
+        }
+        // # 4 Flocking Center
+        val flocen = heartbeat.flocking_center
+        flockingCenter[marker]?.remove()
+        if (!flocen.isEmpty()) {
+            val flockingCenterPolylineOptions = PolylineOptions()
+                .add(latlng)
+                //.add(LatLng(flocen.x, flocen.y))
+                .add(LatLng(latlng.latitude + (flocen.x-latlng.latitude)*3, latlng.longitude+(flocen.y-latlng.longitude)*3))
+                .width(10f)
+                .color(ResourcesCompat.getColor(resources, android.R.color.holo_blue_light, null))
+            flockingCenter[marker] = mGoogleMap.addPolyline(flockingCenterPolylineOptions)
+        }
+        // # 5 Formation Control
+        val forcon = heartbeat.formation_control
+        formationControl[marker]?.remove()
+        if (!forcon.isEmpty()) {
+            val formationControlPolylineOptions = PolylineOptions()
+                .add(latlng)
+                //.add(LatLng(forcon.x, forcon.y))
+                .add(LatLng(latlng.latitude + (forcon.x-latlng.latitude)*3, latlng.longitude+(forcon.y-latlng.longitude)*3))
+                .width(10f)
+                .color(ResourcesCompat.getColor(resources, android.R.color.holo_purple, null))
+            formationControl[marker] = mGoogleMap.addPolyline(formationControlPolylineOptions)
+        }
+        // # 6 Target
+        val _target = heartbeat.target
+        target[marker]?.remove()
+        if (!_target.isEmpty()) {
+            val targetPolylineOptions = PolylineOptions()
+                .add(latlng)
+                //.add(LatLng(_target.x, _target.y))
+                .add(LatLng(latlng.latitude + (_target.x-latlng.latitude)*3, latlng.longitude+(_target.y-latlng.longitude)*3))
+                .width(10f)
+                .color(ResourcesCompat.getColor(resources, R.color.livingCoral, null))
+            target[marker] = mGoogleMap.addPolyline(targetPolylineOptions)
+        }
+        // ==========================================================
         // Leader flag
         if (heartbeat.hostname == droneHostname)
             notifyLeader(heartbeat.leader)
-        notifyGlobalPosition(heartbeat.global_position)
+        notifyGlobalPosition(position)
     }
 
     fun notifyTurnOff(hostname: String) {
@@ -339,8 +426,32 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             .add(position)
             .add(LatLng(position.latitude + 0.00005, position.longitude + 0.0001))
             .width(10f)
-            .color(Color.GREEN)
+            .color(ResourcesCompat.getColor(resources, android.R.color.holo_orange_light, null))
         val polyline = mGoogleMap.addPolyline(polylineOptions)
+        val collisionAvoidancePolylineOptions = PolylineOptions()
+            .add(position)
+            .add(LatLng(position.latitude + 0.000025, position.longitude + 0.0002))
+            .width(10f)
+            .color(ResourcesCompat.getColor(resources, android.R.color.holo_red_light, null))
+        val collisionAvoidancePolyline = mGoogleMap.addPolyline(collisionAvoidancePolylineOptions)
+        val velocityMatchingPolylineOptions = PolylineOptions()
+            .add(position)
+            .add(LatLng(position.latitude - 0.000025, position.longitude + 0.0002))
+            .width(10f)
+            .color(ResourcesCompat.getColor(resources, android.R.color.holo_green_light, null))
+        val velocityMatchingPolyline = mGoogleMap.addPolyline(velocityMatchingPolylineOptions)
+        val flockingCenterPolylineOptions = PolylineOptions()
+            .add(position)
+            .add(LatLng(position.latitude - 0.000025, position.longitude - 0.0001))
+            .width(10f)
+            .color(ResourcesCompat.getColor(resources, android.R.color.holo_blue_light, null))
+        val flockingCenterPolyline = mGoogleMap.addPolyline(flockingCenterPolylineOptions)
+        val formationControlPolylineOptions = PolylineOptions()
+            .add(position)
+            .add(LatLng(position.latitude + 0.00005, position.longitude - 0.0001))
+            .width(10f)
+            .color(ResourcesCompat.getColor(resources, android.R.color.holo_purple, null))
+        val formationControlPolyline = mGoogleMap.addPolyline(formationControlPolylineOptions)
         droneHeadings[marker] = polyline
         return marker
     }

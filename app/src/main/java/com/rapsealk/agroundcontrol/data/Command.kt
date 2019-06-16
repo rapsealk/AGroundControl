@@ -42,7 +42,7 @@ data class LeaderCommand(
         "\"timestamp\": $timestamp," +
         "\"hostname\": \"$hostname\"," +
         "\"target\": \"$target\"," +
-        "\"command\": \"$command\"" +
+        "\"command\": \"$command\"," +
         "\"leader\": $leader" +
     "}"
 }

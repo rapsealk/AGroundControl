@@ -16,7 +16,7 @@ import java.util.*
 import kotlin.Exception
 
 class Socketeer(private val context: Context,
-                hostname: String = "52.231.158.105") {
+                hostname: String = "220.67.133.249" /*"52.231.158.105"*/) {
 
     companion object {
         private val TAG = Socketeer::class.java.simpleName
@@ -33,7 +33,7 @@ class Socketeer(private val context: Context,
     private val mGson = Gson()
     private val mQueue = LinkedList<Pair<String, Any>>()
 
-    private val mSocket: Socket = IO.socket("http://$hostname:3000")
+    private val mSocket: Socket = IO.socket("http://$hostname:8585")
 
     private val onConnect = Emitter.Listener {
         // publish("connection", "{}")

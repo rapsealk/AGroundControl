@@ -12,4 +12,6 @@
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccentLight">#BBBBBB</color>
     <color name="colorAccent">#888888</color>
+
+    <color name="livingCoral">#FA7268</color>
 </resources>
