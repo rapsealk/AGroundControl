@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private val flockingCenter = HashMap<Marker, Polyline>()
     private val formationControl = HashMap<Marker, Polyline>()
     private val target = HashMap<Marker, Polyline>()
+    private val circles = HashMap<Marker, Circle>()
 
     private lateinit var mSocket: Socketeer
 
@@ -370,6 +371,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
                 .color(ResourcesCompat.getColor(resources, R.color.livingCoral, null))
             target[marker] = mGoogleMap.addPolyline(targetPolylineOptions)
         }
+        // # 7 Boundary Circle
+        circles[marker]?.remove()
+        val circleOptions = CircleOptions()
+            .center(latlng)
+            .radius(5.0)    // Radius in meters
+            .strokeWidth(8f)
+            .strokePattern(listOf(Dash(4f)))
+            .strokeColor(Color.YELLOW)
+            .fillColor(Color.TRANSPARENT)
+        circles[marker] = mGoogleMap.addCircle(circleOptions)
         // ==========================================================
         // Leader flag
         if (heartbeat.hostname == droneHostname)
@@ -453,6 +464,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             .color(ResourcesCompat.getColor(resources, android.R.color.holo_purple, null))
         val formationControlPolyline = mGoogleMap.addPolyline(formationControlPolylineOptions)
         droneHeadings[marker] = polyline
+        val circleOptions = CircleOptions()
+            .center(position)
+            .radius(5.0)    // Radius in meters
+            .strokeWidth(8f)
+            .strokePattern(listOf(Dash(4f)))
+            .strokeColor(Color.YELLOW)
+            .fillColor(Color.TRANSPARENT)
+        mGoogleMap.addCircle(circleOptions)
         return marker
     }
 }
