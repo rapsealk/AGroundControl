@@ -375,7 +375,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         circles[marker]?.remove()
         val circleOptions = CircleOptions()
             .center(latlng)
-            .radius(5.0)    // Radius in meters
+            .radius(3.0)    // Radius in meters
             .strokeWidth(8f)
             .strokePattern(listOf(Dash(4f)))
             .strokeColor(Color.YELLOW)

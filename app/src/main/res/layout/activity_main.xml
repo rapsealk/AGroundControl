@@ -428,7 +428,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_target"
                 android:layout_marginStart="4dp"
-                android:text="- radius: 5m"
+                android:text="- radius: 3m"
                 android:textStyle="bold"
                 android:textColor="#FFFF00"/>
 
