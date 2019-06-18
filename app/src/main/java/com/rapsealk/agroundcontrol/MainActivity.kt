@@ -2,6 +2,7 @@ package com.rapsealk.agroundcontrol
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -94,13 +95,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         btn_mark.setOnClickListener(this)
         btn_reset.setOnClickListener(this)
         btn_upload.setOnClickListener(this)
-        btn_ok.setOnClickListener(this)
 
         btn_arm.setOnClickListener(this)
         btn_disarm.setOnClickListener(this)
         btn_takeoff.setOnClickListener(this)
         btn_land.setOnClickListener(this)
         btn_start.setOnClickListener(this)
+
+        tv_test.setOnClickListener(this)
 
         checkPermission()
     }
@@ -212,6 +214,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
                 val waypoints = mMarkers.map { GlobalPosition(it.position.latitude, it.position.longitude, 10.0) }
                 mSocket.queue(Socketeer.EVENT_COMMAND, WaypointCommand(target = droneHostname, waypoints = waypoints))
             }
+            R.id.tv_test -> {
+                val intent = Intent(this, TestActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
     // View.OnClickListener
@@ -233,6 +239,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
      * OnMapReadyCallback
      */
     override fun onMapReady(map: GoogleMap) {
+        // FIXME: Duplicated
         map.setOnCameraIdleListener {
             val size = (128 * (map.cameraPosition.zoom / 20f)).toInt()
             val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.red_zerg), size, size, true)
@@ -240,6 +247,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         }
         map.setOnCameraIdleListener(this)
 
+        /*
         val safeArea = listOf(
             LatLng(37.599227, 126.863522),
             LatLng(37.599356, 126.863067),
@@ -251,6 +259,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
             .fillColor(Color.GREEN)
             .strokeColor(Color.BLUE)
         map.addPolygon(polygonOption)
+        */
 
         // map.mapType = GoogleMap.MAP_TYPE_SATELLITE
 

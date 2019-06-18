@@ -23,6 +23,7 @@
                 android:layout_height="match_parent">
 
             <TextView
+                    android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="parent"
@@ -32,6 +33,20 @@
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="21sp"
                     android:textStyle="bold"/>
+
+            <TextView
+                    android:id="@+id/tv_test"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="@id/tv_title"
+                    app:layout_constraintEnd_toEndOf="@id/tv_title"
+                    app:layout_constraintTop_toTopOf="@id/tv_title"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_title"
+                    android:text="TEST"
+                    android:textColor="#444444"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    android:alpha="0.5"/>
 
             <!-- CheckedTextView -->
             <TextView
@@ -269,7 +284,8 @@
                 app:layout_constraintBottom_toTopOf="@id/tv_command_result_message"
                 android:text="STATUS_MESSAGE"
                 android:textStyle="bold"
-                android:textColor="#444444"/>
+                android:textColor="#444444"
+                android:visibility="gone"/>
 
         <TextView
                 android:id="@+id/tv_command_result_message"
@@ -281,7 +297,8 @@
                 android:layout_marginBottom="16dp"
                 android:text="COMMAND_RESULT_MESSAGE"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"/>
+                android:textColor="@android:color/black"
+                android:visibility="gone"/>
 
         <!--
         <ImageButton
@@ -320,11 +337,10 @@
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintHeight_percent="0.75"
+                app:layout_constraintHeight_percent="0.90"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                tools:context="com.rapsealk.agroundcontrol.MainActivity"/>
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
         <android.support.v7.widget.AppCompatImageView
                 android:layout_width="48dp"
@@ -538,54 +554,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:backgroundTint="@color/colorAccent"
                 android:text="Start"/>
-
-    </android.support.constraint.ConstraintLayout>
-
-    <android.support.constraint.ConstraintLayout
-            android:id="@+id/log_layout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/toolbar"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="#88000000"
-            android:visibility="gone"
-            tools:visibility="invisible">
-
-        <android.support.constraint.ConstraintLayout
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintWidth_percent="0.8"
-                app:layout_constraintHeight_percent="0.8"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:clickable="true"
-                android:alpha="1"
-                android:background="@color/colorAccentLight">
-
-            <android.support.v7.widget.RecyclerView
-                    android:id="@+id/log_recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toTopOf="@id/btn_ok"/>
-
-            <Button
-                    android:id="@+id/btn_ok"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintWidth_percent="0.4"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginBottom="8dp"
-                    android:background="@color/colorAccent"
-                    android:text="확인"/>
-
-        </android.support.constraint.ConstraintLayout>
 
     </android.support.constraint.ConstraintLayout>
 
