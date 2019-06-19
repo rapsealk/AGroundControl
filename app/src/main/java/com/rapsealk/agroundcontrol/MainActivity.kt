@@ -144,21 +144,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private fun init() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         mFusedLocationClient.lastLocation.addOnSuccessListener {
-            //Toast.makeText(this@MainActivity, "(${it.latitude}, ${it.longitude}, ${it.altitude}) with acc: ${it.accuracy}", Toast.LENGTH_LONG).show()
             tv_latitude.text = it.latitude.toString()
             tv_longitude.text = it.longitude.toString()
             tv_altitude.text = String.format("%.6f", it.altitude)
             val latlng = LatLng(it.latitude, it.longitude)
             mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 20f))
-            /* FIXME: sample marker
-            val bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.red_zerg), 128, 128, true)
-            val markerOptions = MarkerOptions()
-                .position(LatLng(it.latitude, it.longitude))
-                .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-            val marker = mGoogleMap.addMarker(markerOptions)
-            marker.tag = "Drone ID #01"
-            droneMarkers[marker.tag as String] = marker
-            */
             //val marker = testMarkerWithHeading(latlng)
         }.addOnFailureListener {
             Toast.makeText(this@MainActivity, "Failed to get last location..", Toast.LENGTH_LONG).show()
