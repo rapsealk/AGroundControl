@@ -7,7 +7,7 @@ import android.widget.Toast
 import com.google.gson.Gson
 import com.rapsealk.agroundcontrol.data.BasicMessage
 import com.rapsealk.agroundcontrol.data.Heartbeat
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main_old.*
 import java.io.*
 import java.net.Socket
 
@@ -59,13 +59,13 @@ class ClientSocket(private val context: Context,
                         "heartbeat" -> {
                             val heartbeat = mGson.fromJson(receivedMessage, Heartbeat::class.java)
                             handler.post {
-                                (context as MainActivity).notifyHeartbeat(heartbeat)
+                                (context as OldMainActivity).notifyHeartbeat(heartbeat)
                             }
                         }
                         "command" -> { /* DO NOTHING */ }
                     }
                     handler.post {
-                        (context as MainActivity).tv_status_message.text = receivedMessage
+                        (context as OldMainActivity).tv_status_message.text = receivedMessage
                     }
                 }
                 Thread.sleep(100)

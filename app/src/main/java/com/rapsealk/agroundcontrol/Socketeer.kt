@@ -51,7 +51,7 @@ class Socketeer(private val context: Context,
         try {
             val heartbeatMessage = mGson.fromJson(heartbeat.toString(), Heartbeat::class.java)
             GlobalScope.launch(Dispatchers.Main) {
-                (context as MainActivity).notifyHeartbeat(heartbeatMessage)
+                (context as OldMainActivity).notifyHeartbeat(heartbeatMessage)
             }
         } catch (exception: JSONException) {
             exception.printStackTrace()
@@ -62,7 +62,7 @@ class Socketeer(private val context: Context,
         val hostname = it.first() as String
         try {
             GlobalScope.launch(Dispatchers.Main) {
-                (context as MainActivity).notifyTurnOff(hostname)
+                (context as OldMainActivity).notifyTurnOff(hostname)
             }
         } catch (exception: Exception) {
             exception.printStackTrace()

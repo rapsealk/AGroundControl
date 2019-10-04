@@ -11,6 +11,7 @@ class Agent(val id: String, val leader: Boolean = false) {
     var position = Vector() // GlobalPosition
     var velocity = Vector()
 
+    /*
     public fun formationFlight(flockmates: List<Agent>, target: LatLng, mode: String = "row") {
         val localized = position.toLocalized()
 
@@ -35,7 +36,9 @@ class Agent(val id: String, val leader: Boolean = false) {
 
 
     }
+    */
 
+    /*
     private fun collisionAvoidance(flockmates: List<Agent>): Vector {
 
     }
@@ -51,8 +54,9 @@ class Agent(val id: String, val leader: Boolean = false) {
     private fun makeSteer(steer: Vector): Vector {
 
     }
+    */
 }
-
+/*
 def formation_flight(self, boundary=FLOCK_BOUNDARY, weights=[1, 1, 1], mode=FlightMode.COLUMN):
 
 col_avo = Vector()
@@ -221,3 +225,4 @@ steer = desired - self._velocity
 steer = steer.make_steer(self._maxforce)
 
 return steer * weight
+*/
